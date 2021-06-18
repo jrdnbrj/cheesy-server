@@ -1,6 +1,8 @@
-fastapi #https://github.com/tiangolo/fastapi
-uvicorn #https://github.com/encode/uvicorn
+fastapi # https://github.com/tiangolo/fastapi
+uvicorn #h ttps://github.com/encode/uvicorn
 graphene # https://github.com/graphql-python/graphene
 python-decouple # https://github.com/henriquebastos/python-decouple
 mongoengine # https://github.com/MongoEngine/mongoengine
-pymongo[srv] #https://github.com/mongodb/mongo-python-driver
+pymongo[srv] # https://github.com/mongodb/mongo-python-driver
+aiofiles
+requests
