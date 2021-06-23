@@ -40,18 +40,18 @@ class _CreateOrder(_PayPalClient):
 
 class _GetOrder(_PayPalClient):
   
-  def get_order(self, order_id):
-    request = OrdersGetRequest(order_id)
-    response = self.client.execute(request)
-    return response
+    def get_order(self, order_id):
+        request = OrdersGetRequest(order_id)
+        response = self.client.execute(request)
+        return response
 
 
 class _CaptureOrder(_PayPalClient):
 
-  def capture_order(self, order_id):
-    request = OrdersCaptureRequest(order_id)
-    response = self.client.execute(request)
-    return response
+    def capture_order(self, order_id):
+        request = OrdersCaptureRequest(order_id)
+        response = self.client.execute(request)
+        return response
 
 
 def create_order():

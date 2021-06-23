@@ -7,3 +7,4 @@ pymongo[srv] # https://github.com/mongodb/mongo-python-driver
 aiofiles
 requests
 paypal-checkout-serversdk
+squareup # https://pypi.org/project/squareup/

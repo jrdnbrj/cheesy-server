@@ -18,4 +18,3 @@ class Query(ObjectType):
         order = capture_order(order_id)
         print('Capture Order:', order)
         return order
-
