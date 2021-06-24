@@ -1,10 +1,10 @@
-from graphene.types.scalars import String
 from mongoengine.document import Document
 from mongoengine.fields import (
     StringField,
     DecimalField,
     DictField,
-    DateTimeField
+    DateTimeField,
+    ListField
 )
 
 from datetime import datetime
@@ -18,6 +18,8 @@ class Product(Document):
     ingredients = StringField(required=True, max_length=500)
     price = DecimalField(precision=2)
     path = StringField(max_length=15)
+
+
 
 
 class PayPalOrder(Document):
@@ -38,6 +40,8 @@ class PayPalOrder(Document):
     update_time = DateTimeField()
 
 
+
+
 class SquarePayment(Document): # https://developer.squareup.com/reference/square/objects/Payment
     payment_id = StringField() # A unique ID for the payment, given by Square
     status = StringField() # APPROVED, PENDING, COMPLETED, CANCELED, or FAILED.
@@ -50,7 +54,7 @@ class SquarePayment(Document): # https://developer.squareup.com/reference/square
     avs_status = StringField() # AVS_ACCEPTED, AVS_REJECTED, or AVS_NOT_CHECKED
     card = DictField() # The credit card's non-confidential details
     card_status = StringField() # AUTHORIZED, CAPTURED, VOIDED, or FAILED
-    card_error = DictField() # Information about errors encountered during the request, return an array of dicts
+    card_error = ListField() # Information about errors encountered during the request, return an array of dicts
     created_at = DateTimeField() # when the payment was created
     authorized_at = DateTimeField() # when the payment was authorized
     captured_at = DateTimeField() # when the payment was captured
@@ -63,13 +67,30 @@ class SquarePayment(Document): # https://developer.squareup.com/reference/square
     verification_results = StringField() # SUCCESS, FAILURE, or UNKNOWN
     delay_action = StringField() # The action to be applied to the payment when the delay_duration has elapsed.
     delay_duration = StringField() # The duration of time after the payment's creation when Square automatically applies the delay_action to the payment
-    delay_until = DecimalField(precision=2) # when the delay_action is automatically applied
+    delayed_until = DateTimeField(precision=2) # when the delay_action is automatically applied
     order_id = StringField()
     location_id = StringField()
     receipt_number = StringField() # The payment's receipt number. The field is missing if a payment is canceled.
     risk_evaluation = DictField() # Provides information about the risk associated with the payment, as determined by Square.
     buyer_email_address = StringField()
-    billing_address = StringField()
-    shipping_address = StringField()
+    billing_address = DictField()
+    shipping_address = DictField()
     note = StringField() # An optional note to include when creating a payment.
     version_token = StringField() # Used for optimistic concurrency. This opaque token identifies a specific version of the Payment object.
+    create_payment_at = DateTimeField(default=datetime.utcnow)
+
+    # if any amount field is -100 it is because the Square Server didn't return that value
+    # if any datetime field is 2000-01-01T00:00:00.000Z it is because the Square Server didn't return that value
+
+
+
+
+class SquarePaymentError(Document): # https://developer.squareup.com/reference/square/objects/Error
+    category = StringField() # The high-level category for the error | API_ERROR, AUTHENTICATION_ERROR, INVALID_REQUEST_ERROR, RATE_LIMIT_ERROR, PAYMENT_METHOD_ERROR or REFUND_ERROR
+    code = StringField() # The specific code of the error. | ... see above url
+    detail = StringField() # A human-readable description of the error for debugging purposes.
+    field = StringField() # The name of the field provided in the original request (if any) that the error pertains to.
+    payment_token = StringField()
+    amount = DecimalField(precision=2)
+    idempotency_key = StringField()
+    created_at = DateTimeField(default=datetime.utcnow)
