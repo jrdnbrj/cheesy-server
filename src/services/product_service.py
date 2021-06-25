@@ -12,13 +12,14 @@ def get_products():
     products = Product.objects()
 
     for product in products:
-        product.images[0] = to_base64(product.images[0])
+        product.images[0] = config('URL') + "static/" + product.images[0]
     
     return products
 
 def get_product_by_path(path):
     product = Product.objects(path=path).first()
-    product.images = [to_base64(img) for img in product.images]
+    product.images = [config('URL') + "static/" + img for img in product.images]
+    # product.images = [to_base64(img) for img in product.images]
 
     return product
 
