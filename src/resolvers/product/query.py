@@ -11,7 +11,9 @@ class Query(ObjectType):
     get_product_by_path = Field(ProductType, path=String(required=True))
 
     def resolve_get_products(parent, info):
+        print('Obteniendo Productos...')
         return get_products()
 
     def resolve_get_product_by_path(parent, info, path):
+        print('Obteniendo producto: ' + path)
         return get_product_by_path(path)

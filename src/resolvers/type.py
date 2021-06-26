@@ -6,6 +6,7 @@ class ProductType(ObjectType):
     id = String(required=True)
     name = String()
     images = List(String)
+    smoothies = List(String)
     description = String()
     short_description = String()
     ingredients = List(String)
