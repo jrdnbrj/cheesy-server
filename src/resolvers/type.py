@@ -12,3 +12,10 @@ class ProductType(ObjectType):
     ingredients = List(String)
     price = Decimal()
     path = String()
+
+
+class ContactType(ObjectType):
+    full_name = String()
+    email = String()
+    phone = String()
+    message = String()

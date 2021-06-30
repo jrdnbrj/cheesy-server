@@ -4,14 +4,15 @@ from mongoengine.fields import (
     DecimalField,
     DictField,
     DateTimeField,
-    ListField
+    ListField,
+    EmailField
 )
 
 from datetime import datetime
 
 
 class Product(Document):
-    name = StringField(required=True, unique=True, max_length=25)
+    name = StringField(required=True, max_length=25)
     images = StringField(max_length=1000)
     smoothies = ListField()
     description = StringField(required=True, max_length=1000)
@@ -20,6 +21,24 @@ class Product(Document):
     price = DecimalField(precision=2)
     path = StringField(max_length=15)
 
+
+
+class Contact(Document):
+    full_name = StringField()
+    email = EmailField()
+    phone = StringField()
+    message = StringField()
+
+
+
+class CheckoutContact(Document):
+    name = StringField()
+    last_name = StringField()
+    phone = StringField()
+    email = EmailField()
+    address = StringField()
+    suite = StringField()
+    city = StringField()
 
 
 
@@ -39,7 +58,6 @@ class PayPalOrder(Document):
     capture_time = DateTimeField(default=datetime.utcnow)
     create_time = DateTimeField()
     update_time = DateTimeField()
-
 
 
 
@@ -82,7 +100,6 @@ class SquarePayment(Document): # https://developer.squareup.com/reference/square
 
     # if any amount field is -100 it is because the Square Server didn't return that value
     # if any datetime field is 2000-01-01T00:00:00.000Z it is because the Square Server didn't return that value
-
 
 
 
