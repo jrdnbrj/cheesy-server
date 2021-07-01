@@ -1,32 +1,33 @@
 from graphene import ObjectType, Mutation
-from graphene import String, Decimal
+from graphene import String, Decimal, List, Boolean
 
-from ...services.product_service import create_product
+from ...services.product_service import edit_product
 
 
-class CreateProduct(Mutation):
+class EditProduct(Mutation):
     class Arguments:
-        name = String()
-        description = String()
-        short_description = String()
-        ingredients = String()
-        price = Decimal()
+        name = String(required=True)
+        images = List(String, required=True)
+        price = Decimal(required=True)
+        description = String(required=True)
+        short_description = String(required=True)
+        ingredients = List(String, required=True)
+        path = String(required=True)
 
-    name = String()
-    description = String()
-    short_description = String()
-    ingredients = String()
-    price = String()
+    result = Boolean()
 
-    def mutate(root, info, name=None, description=None, short_description=None, ingredients=None, price=None,):
-        return create_product(
+    def mutate(root, info, name=None, images=None, price=None, description=None, short_description=None, ingredients=None, path=None):
+        result = edit_product(
             name=name, 
+            images=images, 
+            price=price, 
             description=description, 
             short_description=short_description, 
             ingredients=ingredients, 
-            price=price, 
+            path=path, 
         )
+        return { 'result': result }
 
 
 class Mutation(ObjectType):
-    create_product = CreateProduct.Field()
+    edit_product = EditProduct.Field()

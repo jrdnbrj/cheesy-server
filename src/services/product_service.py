@@ -5,14 +5,20 @@ from decouple import config
 from ..db.documents import Product
 
 
-def create_product(**kwargs):
-    return Product(**kwargs).save()
+def edit_product(**kwargs):
+    path = kwargs.get('path', 'nada')
+    try:
+        product = Product.objects(path=path).update(**kwargs)
+        return True
+    except:
+        return False
 
 def get_products():
     products = Product.objects()
 
     for product in products:
-        product.images[0] = config('URL') + "static/" + product.images[0]
+        # product.images[0] = config('URL') + "static/" + product.images[0]
+        product.images = [config('URL') + "static/" + img for img in product.images]
     
     return products
 

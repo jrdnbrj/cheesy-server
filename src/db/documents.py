@@ -13,11 +13,11 @@ from datetime import datetime
 
 class Product(Document):
     name = StringField(required=True, max_length=25)
-    images = StringField(max_length=1000)
+    images = ListField(max_length=1000)
     smoothies = ListField()
     description = StringField(required=True, max_length=1000)
     short_description = StringField(max_length=500)
-    ingredients = StringField(required=True, max_length=500)
+    ingredients = ListField(required=True, max_length=500)
     price = DecimalField(precision=2)
     path = StringField(max_length=15)
 
