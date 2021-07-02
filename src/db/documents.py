@@ -5,7 +5,8 @@ from mongoengine.fields import (
     DictField,
     DateTimeField,
     ListField,
-    EmailField
+    EmailField,
+    IntField
 )
 
 from datetime import datetime
@@ -20,6 +21,7 @@ class Product(Document):
     ingredients = ListField(required=True, max_length=500)
     price = DecimalField(precision=2)
     path = StringField(max_length=15)
+    sequence = IntField()
 
 
 

@@ -1,5 +1,5 @@
 from graphene import ObjectType
-from graphene import String, Decimal, List
+from graphene import String, Decimal, List, Int
 
 
 class ProductType(ObjectType):
@@ -12,6 +12,7 @@ class ProductType(ObjectType):
     ingredients = List(String)
     price = Decimal()
     path = String()
+    sequence = Int()
 
 
 class ContactType(ObjectType):

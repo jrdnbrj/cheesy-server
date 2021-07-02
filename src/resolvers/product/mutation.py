@@ -17,6 +17,7 @@ class EditProduct(Mutation):
     result = Boolean()
 
     def mutate(root, info, name=None, images=None, price=None, description=None, short_description=None, ingredients=None, path=None):
+        print('Actualizando Producto...')
         result = edit_product(
             name=name, 
             images=images, 
@@ -26,6 +27,7 @@ class EditProduct(Mutation):
             ingredients=ingredients, 
             path=path, 
         )
+        print('Result:', result)
         return { 'result': result }
 
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 import base64
 import requests
 
@@ -6,15 +7,31 @@ from ..db.documents import Product
 
 
 def edit_product(**kwargs):
-    path = kwargs.get('path', 'nada')
     try:
-        product = Product.objects(path=path).update(**kwargs)
+        path = kwargs.get('path', 'nada')
+        images = []
+        for image in kwargs.get('images'):
+            if 'static' not in image:
+                img = image.split('base64,')[1]
+                img = base64.b64decode(img)
+                filename = str(datetime.now()) + '.png'
+                with open('static/' + filename, 'wb') as file:
+                    file.write(img)
+                images.append(filename)
+            else:
+                pass
+                name = image.split('/')[-1]
+                images.append(name)
+
+        kwargs['images'] = images
+        Product.objects(path=path).update(**kwargs)
         return True
+        
     except:
         return False
 
 def get_products():
-    products = Product.objects()
+    products = Product.objects().order_by('sequence')
 
     for product in products:
         # product.images[0] = config('URL') + "static/" + product.images[0]
