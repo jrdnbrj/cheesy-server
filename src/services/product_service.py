@@ -19,7 +19,6 @@ def edit_product(**kwargs):
                     file.write(img)
                 images.append(filename)
             else:
-                pass
                 name = image.split('/')[-1]
                 images.append(name)
 
@@ -34,7 +33,6 @@ def get_products():
     products = Product.objects().order_by('sequence')
 
     for product in products:
-        # product.images[0] = config('URL') + "static/" + product.images[0]
         product.images = [config('URL') + "static/" + img for img in product.images]
     
     return products
@@ -42,14 +40,13 @@ def get_products():
 def get_product_by_path(path):
     product = Product.objects(path=path).first()
     product.images = [config('URL') + "static/" + img for img in product.images]
-    # product.images = [to_base64(img) for img in product.images]
 
     return product
 
-def to_base64(img_name):
-    try:
-        image_url = config('URL') + "static/" + img_name
-        image = base64.b64encode(requests.get(image_url).content)
-        return image.decode('utf-8')
-    except:
-        return ''
+# def to_base64(img_name):
+#     try:
+#         image_url = config('URL') + "static/" + img_name
+#         image = base64.b64encode(requests.get(image_url).content)
+#         return image.decode('utf-8')
+#     except:
+#         return ''
