@@ -16,6 +16,7 @@ class ProductType(ObjectType):
 
 
 class ContactType(ObjectType):
+    id = String()
     full_name = String()
     email = String()
     phone = String()
