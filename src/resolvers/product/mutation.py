@@ -13,10 +13,11 @@ class EditProduct(Mutation):
         short_description = String(required=True)
         ingredients = List(String, required=True)
         path = String(required=True)
+        smoothies = List(List(String), required=True)
 
     result = Boolean()
 
-    def mutate(root, info, name=None, images=None, price=None, description=None, short_description=None, ingredients=None, path=None):
+    def mutate(root, info, name=None, images=None, price=None, description=None, short_description=None, ingredients=None, path=None, smoothies=None):
         print('Actualizando Producto...')
         result = edit_product(
             name=name, 
@@ -26,8 +27,8 @@ class EditProduct(Mutation):
             short_description=short_description, 
             ingredients=ingredients, 
             path=path, 
+            smoothies=smoothies
         )
-        print('Result:', result)
         return { 'result': result }
 
 

@@ -8,10 +8,11 @@ from ..db.documents import Product
 
 def edit_product(**kwargs):
     try:
-        path = kwargs.get('path', 'nada')
+        path = kwargs.get('path')
+
         images = []
         for image in kwargs.get('images'):
-            if 'static' not in image:
+            if '/static/' not in image:
                 img = image.split('base64,')[1]
                 img = base64.b64decode(img)
                 filename = str(datetime.now()) + '.png'
@@ -22,8 +23,24 @@ def edit_product(**kwargs):
                 name = image.split('/')[-1]
                 images.append(name)
 
+        smoothies = []
+        for smoothie in kwargs.get('smoothies'):
+            if '/static/' not in smoothie[1]:
+                img = smoothie[1].split('base64,')[1]
+                img = base64.b64decode(img)
+                filename = str(datetime.now()) + '.png'
+                with open('static/' + filename, 'wb') as file:
+                    file.write(img)
+                smoothies.append([smoothie[0], filename, smoothie[2]])
+            else:
+                name = smoothie[1].split('/')[-1]
+                smoothies.append([smoothie[0], name, smoothie[2]])
+
         kwargs['images'] = images
+        kwargs['smoothies'] = smoothies
+
         Product.objects(path=path).update(**kwargs)
+
         return True
         
     except:
@@ -34,12 +51,18 @@ def get_products():
 
     for product in products:
         product.images = [config('URL') + "static/" + img for img in product.images]
+
+        for smoothie in product.smoothies:
+            smoothie[1] = config('URL') + "static/" + smoothie[1]
     
     return products
 
 def get_product_by_path(path):
     product = Product.objects(path=path).first()
     product.images = [config('URL') + "static/" + img for img in product.images]
+
+    for smoothie in product.smoothies:
+        smoothie[1] = config('URL') + "static/" + smoothie[1]
 
     return product
 
