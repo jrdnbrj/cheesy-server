@@ -1,6 +1,5 @@
 from datetime import datetime
 import base64
-import requests
 
 from decouple import config
 from ..db.documents import Product
@@ -14,27 +13,21 @@ def edit_product(**kwargs):
         for image in kwargs.get('images'):
             if '/static/' not in image:
                 img = image.split('base64,')[1]
-                img = base64.b64decode(img)
-                filename = str(datetime.now()) + '.png'
-                with open('static/' + filename, 'wb') as file:
-                    file.write(img)
-                images.append(filename)
+                filename = base64_to_file(img)
             else:
-                name = image.split('/')[-1]
-                images.append(name)
+                filename = image.split('/')[-1]
+
+            images.append(filename)
 
         smoothies = []
         for smoothie in kwargs.get('smoothies'):
             if '/static/' not in smoothie[1]:
                 img = smoothie[1].split('base64,')[1]
-                img = base64.b64decode(img)
-                filename = str(datetime.now()) + '.png'
-                with open('static/' + filename, 'wb') as file:
-                    file.write(img)
-                smoothies.append([smoothie[0], filename, smoothie[2]])
+                smoothie[1] = base64_to_file(img) 
             else:
-                name = smoothie[1].split('/')[-1]
-                smoothies.append([smoothie[0], name, smoothie[2]])
+                smoothie[1] = smoothie[1].split('/')[-1] 
+                
+            smoothies.append(smoothie)
 
         kwargs['images'] = images
         kwargs['smoothies'] = smoothies
@@ -65,6 +58,15 @@ def get_product_by_path(path):
         smoothie[1] = config('URL') + "static/" + smoothie[1]
 
     return product
+
+
+def base64_to_file(img_encoded):
+    img = base64.b64decode(img_encoded)
+    filename = str(datetime.now()) + '.png'
+    with open('static/' + filename, 'wb') as file:
+        file.write(img)
+    
+    return filename
 
 # def to_base64(img_name):
 #     try:
