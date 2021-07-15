@@ -14,6 +14,16 @@ client = Client(
     environment=config('SQUARE_ENVIRONMENT')
 )
 
+# PAYMENTS
+
+def list_payments():
+    result = client.payments.list_payments()
+
+    if result.is_success():
+        print(result.body)
+    elif result.is_error():
+        print(result.errors)
+
 
 def create_payment(payment_token, amount):
     idempotency_key = str(uuid.uuid4())
@@ -92,6 +102,163 @@ def create_payment(payment_token, amount):
                 idempotency_key = idempotency_key
             )
             new_payment_error.save()
+        raise Exception('Error in create_payment.', result.errors[0].get('detail'))
 
 
+# CUSTOMERS
+
+def list_customers():
+    result = client.customers.list_customers()
+
+    if result.is_success():
+        print(result.body)
+        return result.body
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in list_customers.', result.errors[0].get('detail'))
+
+
+def create_customer():
+    result = client.customers.create_customer(
+        body = {
+            "given_name": "Customer",
+            "family_name": "New",
+            "email_address": "customer@cheesybittes.com",
+            "address": {
+                "address_line_1": "501 Electric Ave",
+                "address_line_2": "Suite 601",
+                "locality": "New Yorke",
+                "postal_code": "10004",
+                "country": "US"
+            },
+            "phone_number": "8945123156",
+            "note": "New Customer (2)",
+        }
+    )
+
+    if result.is_success():
+        print(result.body)
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in create_customer.', result.errors[0].get('detail'))
+
+
+# CARDS
+
+def list_cards():
+    result = client.cards.list_cards()
+
+    if result.is_success():
+        print(result.body)
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in list_cards.', result.errors[0].get('detail'))
+
+
+def create_card():
+    idempotency_key = str(uuid.uuid4())
+    result = client.cards.create_card(
+        body = {
+            "idempotency_key": idempotency_key,
+            "source_id": "cnon:CBASEHGhk86Wu5B7M6pcF7fax7o",
+            "card": {
+                "cardholder_name": "Jordano Borjano",
+                "customer_id": "JDPSX0F8MCXYX6WTF8D9VGVAGW",
+            }
+        }
+    )
+
+    if result.is_success():
+        print(result.body)
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in create_card.', result.errors[0].get('detail'))
+
+
+# CATALOGS
+
+def get_catalog_info():
+    result = client.catalog.catalog_info()
+
+    if result.is_success():
+        print(result.body)
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in get_catalog_info.', result.errors[0].get('detail'))
+
+
+def list_catalogs():
+    result = client.catalog.list_catalog(types = "SUBSCRIPTION_PLAN")
+
+    if result.is_success():
+        print('Result:', result.body)
+    elif result.is_error():
+        print('Error:', result.errors)
+        raise Exception('Error in list_catalogs.', result.errors[0].get('detail'))
+
+
+def upsert_catalog():
+    idempotency_key = str(uuid.uuid4())
+    result = client.catalog.upsert_catalog_object(
+        body = {
+            "idempotency_key": idempotency_key,
+            "object": {
+                "type": "SUBSCRIPTION_PLAN",
+                "id": "#plan5",
+                "subscription_plan_data": {
+                    "name": "Cheesy Bittes Club..",
+                    "phases": [
+                        {
+                            "cadence": "DAILY",
+                            "recurring_price_money": {
+                                "amount": 1500,
+                                "currency": "USD"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    )
+
+    if result.is_success():
+        print('Result:', result.body)
+    elif result.is_error():
+        print('Error:', result.errors)
+        raise Exception('Error in upsert_catalog.', result.errors[0].get('detail'))
+
+
+# SUBSCRIPTIONS
+
+def create_subscription():
+    idempotency_key = str(uuid.uuid4())
+    result = client.subscriptions.create_subscription(
+        body = {
+            "idempotency_key": idempotency_key,
+            "location_id": "LWB5K8RGJYJSY",
+            "plan_id": "SIEONDW43O4OGA4KQGCD6VAL",
+            "customer_id": "JDPSX0F8MCXYX6WTF8D9VGVAGW",
+            "card_id": "ccof:sQ7T97tS3qWMafDg4GB",
+            "tax_percentage": "5",
+        }
+    )
+
+    if result.is_success():
+        print('Result:', result.body)
+    elif result.is_error():
+        print('Error:', result.errors)
+        raise Exception('Error in create_subscription.', result.errors[0].get('detail'))
+
+
+# INVOICES
+
+def list_invoices():
+    result = client.invoices.list_invoices(location_id = "LWB5K8RGJYJSY")
+
+    if result.is_success():
+        print(result.body)
+        return result.body
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in list_invoices.', result.errors[0].get('detail'))
 
