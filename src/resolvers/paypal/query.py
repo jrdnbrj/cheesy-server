@@ -1,9 +1,10 @@
 from graphene import ObjectType
-from graphene import String, Field, JSONString
+from graphene import String, Field, JSONString, List
 
 from ...services.paypal_service import (
     create_order, 
     capture_order, 
+    list_orders,
     create_product, 
     list_products, 
     list_plans, 
@@ -13,10 +14,13 @@ from ...services.paypal_service import (
     activate_subscription
 )
 
+from ..type import PayPalOrderType
+
 
 class Query(ObjectType):
     create_order = Field(String)
     capture_order = Field(JSONString, order_id=String(required=True))
+    list_orders = List(PayPalOrderType)
     list_products = Field(JSONString)
     create_product = Field(JSONString)
     list_plans = Field(JSONString)
@@ -37,6 +41,9 @@ class Query(ObjectType):
         print('Capture Order:', order)
         return order
     
+    def resolve_list_orders(parent, info):
+        return list_orders()
+
     def resolve_list_products(parent, info):
         return list_products()
 

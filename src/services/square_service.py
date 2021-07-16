@@ -21,8 +21,10 @@ def list_payments():
 
     if result.is_success():
         print(result.body)
+        return result.body
     elif result.is_error():
         print(result.errors)
+        raise Exception('Error in list_payments.', result.errors[0].get('detail'))
 
 
 def create_payment(payment_token, amount):
@@ -192,6 +194,7 @@ def list_catalogs():
 
     if result.is_success():
         print('Result:', result.body)
+        return result.body
     elif result.is_error():
         print('Error:', result.errors)
         raise Exception('Error in list_catalogs.', result.errors[0].get('detail'))

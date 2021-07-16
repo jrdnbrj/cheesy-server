@@ -17,21 +17,20 @@ from ...services.square_service import (
 
 
 class Query(ObjectType):
-    list_payments = Field(String)
+    list_payments = Field(JSONString)
     create_payment = Field(String, payment_token=String(required=True))
     list_customers = Field(JSONString)
     create_customer = Field(String)
     list_cards = Field(String)
     create_card = Field(String)
     get_catalog_info = Field(String)
-    list_catalogs = Field(String)
+    list_catalogs = Field(JSONString)
     upsert_catalog = Field(String)
     create_square_subscription = Field(String)
     list_invoices = Field(JSONString)
 
     def resolve_list_payments(parent, info):
-        list_payments()
-        return 'OK'
+        return list_payments()
 
     def resolve_create_payment(parent, info, payment_token):
         payment = create_payment(payment_token, 21000)
@@ -58,8 +57,7 @@ class Query(ObjectType):
         return 'OK'
 
     def resolve_list_catalogs(parent, info):
-        list_catalogs()
-        return 'OK'
+        return list_catalogs()
 
     def resolve_upsert_catalog(parent, info):
         upsert_catalog()

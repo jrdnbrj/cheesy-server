@@ -19,6 +19,8 @@ import uuid
 import json
 
 
+authorization = 'Bearer A21AALd62VFkuOfCD6RWpeBqGc0m5FBdI6zX7ZROpWe0M43pglzd4EgKJp2ld6R7DL17Kg0MDMkCucdKu_hUC9Z5qXDtcc6UA'
+
 class _PayPalClient:
 
     def __init__(self):
@@ -108,6 +110,10 @@ def capture_order(order_id):
     return order
 
 
+def list_orders():
+    return PayPalOrder.objects()
+
+
 def list_products():
     url = 'https://api-m.sandbox.paypal.com/v1/catalogs/products?total_required=true'
     headers = {
@@ -123,7 +129,7 @@ def create_product():
     url = 'https://api-m.sandbox.paypal.com/v1/catalogs/products'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
         "PayPal-Request-Id": str(uuid.uuid4())
     }
     data = {
@@ -143,7 +149,7 @@ def list_plans():
     url = 'https://api-m.sandbox.paypal.com/v1/billing/plans?total_required=true'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
     }
     response = requests.get(url, headers=headers)
     print('List Plans:', response.json())
@@ -154,7 +160,7 @@ def create_plan():
     url = 'https://api-m.sandbox.paypal.com/v1/billing/plans'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
     }
     data = {
         "name": "Cheesy Bittes Plan",
@@ -191,7 +197,7 @@ def create_subscription():
     url = 'https://api-m.sandbox.paypal.com/v1/billing/subscriptions'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
         "PayPal-Request-Id": str(uuid.uuid4())
     }
     data = {
@@ -242,7 +248,7 @@ def show_subscription_details():
     url = 'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-S39436D0F2AF'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
     }
     response = requests.get(url, headers=headers)
     print('show_subscription_details:', response.json())
@@ -253,7 +259,7 @@ def activate_subscription():
     url = 'https://api-m.sandbox.paypal.com/v1/billing/subscriptions/I-S39436D0F2AF/activate'
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer ",
+        "Authorization": authorization,
     }
     data = {
         'reason': 'Activating subscription by Jordan'
