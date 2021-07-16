@@ -19,7 +19,7 @@ import uuid
 import json
 
 
-authorization = 'Bearer A21AALd62VFkuOfCD6RWpeBqGc0m5FBdI6zX7ZROpWe0M43pglzd4EgKJp2ld6R7DL17Kg0MDMkCucdKu_hUC9Z5qXDtcc6UA'
+authorization = 'Bearer '
 
 class _PayPalClient:
 
