@@ -56,18 +56,19 @@ class _CaptureOrder(_PayPalClient):
         return response
 
 
-def create_order():
+def create_order(amount):
+    print('amount:', amount)
     request_body = {
         "intent": "CAPTURE",
         "purchase_units": [
             {
                 "amount": {
                     "currency_code": "USD",
-                    "value": 24.55,
+                    "value": str(amount),
                     "breakdown": {
                         "item_total": {
                             "currency_code": "USD",
-                            "value": 24.55
+                            "value": str(amount)
                         },
                     }
                 }
@@ -81,10 +82,10 @@ def create_order():
     return data
 
 
-def capture_order(order_id):
+def capture_order(order_id, cart):
     order = _CaptureOrder().capture_order(order_id)
     order = order.result.__dict__['_dict']
-    # print('DATAAA:', order)
+    print('Cart:', cart)
 
     try:
         new_order = PayPalOrder(

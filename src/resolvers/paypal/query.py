@@ -16,10 +16,12 @@ from ...services.paypal_service import (
 
 from ..type import PayPalOrderType
 
+from decimal import Decimal
+
 
 class Query(ObjectType):
-    create_order = Field(String)
-    capture_order = Field(JSONString, order_id=String(required=True))
+    create_order = Field(String, amount=String(required=True))
+    capture_order = Field(JSONString, order_id=String(required=True), cart=JSONString(required=True))
     list_orders = List(PayPalOrderType)
     list_products = Field(JSONString)
     create_product = Field(JSONString)
@@ -29,15 +31,15 @@ class Query(ObjectType):
     show_subscription_details = Field(JSONString)
     activate_subscription = Field(JSONString)
 
-    def resolve_create_order(parent, info):
+    def resolve_create_order(parent, info, amount):
         print('Creando ando...')
-        order = create_order()
+        order = create_order(round(Decimal(amount), 2))
         print('Create Order:', order['id'])
         return order['id']
     
-    def resolve_capture_order(parent, info, order_id):
+    def resolve_capture_order(parent, info, order_id, cart):
         print('Capturando ando...')
-        order = capture_order(order_id)
+        order = capture_order(order_id, cart)
         print('Capture Order:', order)
         return order
     
