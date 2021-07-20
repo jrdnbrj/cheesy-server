@@ -1,4 +1,4 @@
-from mongoengine.document import Document
+from mongoengine.document import Document, EmbeddedDocument
 from mongoengine.fields import (
     StringField,
     DecimalField,
@@ -6,7 +6,8 @@ from mongoengine.fields import (
     DateTimeField,
     ListField,
     EmailField,
-    IntField
+    IntField,
+    EmbeddedDocumentField
 )
 
 from datetime import datetime
@@ -24,7 +25,6 @@ class Product(Document):
     sequence = IntField()
 
 
-
 class Contact(Document):
     full_name = StringField()
     email = EmailField()
@@ -32,16 +32,20 @@ class Contact(Document):
     message = StringField()
 
 
+class CheckoutInfoEmbedded(EmbeddedDocument):
+    name = StringField()
+    phone = StringField()
+    email = StringField()
+    address = StringField()
+    address2 = StringField()
+    city = StringField()
+    state = StringField()
+    zip_code = StringField()
+
 
 class CheckoutContact(Document):
-    name = StringField()
-    last_name = StringField()
-    phone = StringField()
-    email = EmailField()
-    address = StringField()
-    suite = StringField()
-    city = StringField()
-
+    shipping_information = EmbeddedDocumentField(CheckoutInfoEmbedded, required=True)
+    billing_information = EmbeddedDocumentField(CheckoutInfoEmbedded, required=True)
 
 
 class PayPalOrder(Document):
@@ -60,7 +64,6 @@ class PayPalOrder(Document):
     capture_time = DateTimeField(default=datetime.utcnow)
     create_time = DateTimeField()
     update_time = DateTimeField()
-
 
 
 class SquarePayment(Document): # https://developer.squareup.com/reference/square/objects/Payment
@@ -102,7 +105,6 @@ class SquarePayment(Document): # https://developer.squareup.com/reference/square
 
     # if any amount field is -100 it is because the Square Server didn't return that value
     # if any datetime field is 2000-01-01T00:00:00.000Z it is because the Square Server didn't return that value
-
 
 
 class SquarePaymentError(Document): # https://developer.squareup.com/reference/square/objects/Error

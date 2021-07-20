@@ -1,5 +1,5 @@
-from graphene import ObjectType
-from graphene import String, Decimal, List, Int, DateTime, JSONString
+from graphene import ObjectType, InputObjectType
+from graphene import String, Decimal, List, Int, DateTime, JSONString, Boolean
 
 class SmoothieType(ObjectType):
     name = String()
@@ -20,12 +20,53 @@ class ProductType(ObjectType):
     sequence = Int()
 
 
+
+class CartType(InputObjectType):
+    path = String()
+    amount = Int(required=True)
+    price = Decimal(required=True)
+    image = String()
+    name = String()
+    total = Decimal(required=True)
+    bundle_up = Int()
+    buy_once = Boolean()
+    join_club = Boolean()
+    choose1 = String()
+    choose3 = List(List(String))
+
+
 class ContactType(ObjectType):
     id = String()
     full_name = String()
     email = String()
     phone = String()
     message = String()
+
+
+class CheckoutInfoInputType(InputObjectType):
+    name = String(required=True)
+    phone = String(required=True)
+    email = String(required=True)
+    address = String(required=True)
+    address2 = String(required=True)
+    city = String(required=True)
+    state = String(required=True)
+    zip_code = String(required=True)
+
+class CheckoutInfoType(ObjectType):
+    name = String(required=True)
+    phone = String(required=True)
+    email = String(required=True)
+    address = String(required=True)
+    address2 = String(required=True)
+    city = String(required=True)
+    state = String(required=True)
+    zip_code = String(required=True)
+
+
+class CheckoutContactType(ObjectType):
+    shipping_information = CheckoutInfoType()
+    billing_information = CheckoutInfoType()
 
 
 class PayPalOrderType(ObjectType):

@@ -15,10 +15,12 @@ from ...services.square_service import (
     list_invoices
 )
 
+from decimal import Decimal
+
 
 class Query(ObjectType):
     list_payments = Field(JSONString)
-    create_payment = Field(String, payment_token=String(required=True))
+    create_payment = Field(String, payment_token=String(required=True), amount=String(required=True))
     list_customers = Field(JSONString)
     create_customer = Field(String)
     list_cards = Field(String)
@@ -32,10 +34,9 @@ class Query(ObjectType):
     def resolve_list_payments(parent, info):
         return list_payments()
 
-    def resolve_create_payment(parent, info, payment_token):
-        payment = create_payment(payment_token, 21000)
-        # print('Payment:', payment)
-        return 'Hola'
+    def resolve_create_payment(parent, info, payment_token, amount):
+        amount = Decimal(amount)
+        return create_payment(payment_token, round(amount * 100, 2))
 
     def resolve_list_customers(parent, info):
         return list_customers()

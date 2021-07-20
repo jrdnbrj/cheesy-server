@@ -7,7 +7,7 @@ from decouple import config
 from datetime import datetime
 from decimal import Decimal
 import uuid
-
+import math
 
 client = Client(
     access_token=config('SQUARE_ACCESS_TOKEN'), 
@@ -24,11 +24,12 @@ def list_payments():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_payments.', result.errors[0].get('detail'))
+        raise Exception('Error in list_payments: {}'.format(result.errors[0].get('detail')))
 
 
 def create_payment(payment_token, amount):
     idempotency_key = str(uuid.uuid4())
+    amount = math.trunc(amount)
 
     body = {
         "source_id": payment_token,
@@ -90,9 +91,8 @@ def create_payment(payment_token, amount):
         )
         new_payment.save()
 
+        return data.get('status')
     elif result.is_error():
-        # print('Square Error:', result.errors)
-        
         for error in result.errors:
             new_payment_error = SquarePaymentError(
                 category = error.get('category'),
@@ -104,7 +104,7 @@ def create_payment(payment_token, amount):
                 idempotency_key = idempotency_key
             )
             new_payment_error.save()
-        raise Exception('Error in create_payment.', result.errors[0].get('detail'))
+        raise Exception('Error in create_payment: {}'.format(result.errors[0].get('detail')))
 
 
 # CUSTOMERS
@@ -117,7 +117,7 @@ def list_customers():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_customers.', result.errors[0].get('detail'))
+        raise Exception('Error in list_customers: {}'.format(result.errors[0].get('detail')))
 
 
 def create_customer():
@@ -142,7 +142,7 @@ def create_customer():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in create_customer.', result.errors[0].get('detail'))
+        raise Exception('Error in create_customer: {}'.format(result.errors[0].get('detail')))
 
 
 # CARDS
@@ -154,7 +154,7 @@ def list_cards():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_cards.', result.errors[0].get('detail'))
+        raise Exception('Error in list_cards: {}'.format(result.errors[0].get('detail')))
 
 
 def create_card():
@@ -174,7 +174,7 @@ def create_card():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in create_card.', result.errors[0].get('detail'))
+        raise Exception('Error in create_card: {}'.format(result.errors[0].get('detail')))
 
 
 # CATALOGS
@@ -186,7 +186,7 @@ def get_catalog_info():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in get_catalog_info.', result.errors[0].get('detail'))
+        raise Exception('Error in get_catalog_info.: {}'.format(result.errors[0].get('detail')))
 
 
 def list_catalogs():
@@ -197,7 +197,7 @@ def list_catalogs():
         return result.body
     elif result.is_error():
         print('Error:', result.errors)
-        raise Exception('Error in list_catalogs.', result.errors[0].get('detail'))
+        raise Exception('Error in list_catalogs: {}'.format(result.errors[0].get('detail')))
 
 
 def upsert_catalog():
@@ -228,7 +228,7 @@ def upsert_catalog():
         print('Result:', result.body)
     elif result.is_error():
         print('Error:', result.errors)
-        raise Exception('Error in upsert_catalog.', result.errors[0].get('detail'))
+        raise Exception('Error in upsert_catalog: {}'.format(result.errors[0].get('detail')))
 
 
 # SUBSCRIPTIONS
@@ -250,7 +250,7 @@ def create_subscription():
         print('Result:', result.body)
     elif result.is_error():
         print('Error:', result.errors)
-        raise Exception('Error in create_subscription.', result.errors[0].get('detail'))
+        raise Exception('Error in create_subscription: {}'.format(result.errors[0].get('detail')))
 
 
 # INVOICES
@@ -263,5 +263,5 @@ def list_invoices():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_invoices.', result.errors[0].get('detail'))
+        raise Exception('Error in list_invoices: {}'.format(result.errors[0].get('detail')))
 

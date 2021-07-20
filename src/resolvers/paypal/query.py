@@ -14,14 +14,14 @@ from ...services.paypal_service import (
     activate_subscription
 )
 
-from ..type import PayPalOrderType
+from ..type import PayPalOrderType, CartType
 
 from decimal import Decimal
 
 
 class Query(ObjectType):
     create_order = Field(String, amount=String(required=True))
-    capture_order = Field(JSONString, order_id=String(required=True), cart=JSONString(required=True))
+    capture_order = Field(JSONString, order_id=String(required=True), cart=List(CartType, required=True))
     list_orders = List(PayPalOrderType)
     list_products = Field(JSONString)
     create_product = Field(JSONString)
