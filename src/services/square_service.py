@@ -20,7 +20,6 @@ def list_payments():
     result = client.payments.list_payments()
 
     if result.is_success():
-        print(result.body)
         return result.body
     elif result.is_error():
         print(result.errors)
@@ -113,7 +112,6 @@ def list_customers():
     result = client.customers.list_customers()
 
     if result.is_success():
-        print(result.body)
         return result.body
     elif result.is_error():
         print(result.errors)
@@ -193,7 +191,6 @@ def list_catalogs():
     result = client.catalog.list_catalog(types = "SUBSCRIPTION_PLAN")
 
     if result.is_success():
-        print('Result:', result.body)
         return result.body
     elif result.is_error():
         print('Error:', result.errors)
@@ -259,7 +256,6 @@ def list_invoices():
     result = client.invoices.list_invoices(location_id = "LWB5K8RGJYJSY")
 
     if result.is_success():
-        print(result.body)
         return result.body
     elif result.is_error():
         print(result.errors)

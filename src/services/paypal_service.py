@@ -108,7 +108,7 @@ def create_order(amount):
 def capture_order(order_id, cart):
     order = _CaptureOrder().capture_order(order_id)
     order = order.result.__dict__['_dict']
-    print('Cart:', cart)
+    # print('Cart:', cart)
 
     try:
         new_order = PayPalOrder(
@@ -145,7 +145,6 @@ def list_products():
         "Authorization": "Bearer ",
     }
     response = requests.get(url, headers=headers)
-    print('List Products:', response.json())
     return response.json()
 
 
@@ -176,7 +175,6 @@ def list_plans():
         "Authorization": authorization,
     }
     response = requests.get(url, headers=headers)
-    print('List Plans:', response.json())
     return response.json()
 
 
@@ -213,7 +211,6 @@ def create_plan():
         }
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
-    print('create_plan:', response.json())
     return response.json()
 
 
@@ -264,7 +261,6 @@ def create_subscription():
         }
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
-    print('create_subscription:', response.json())
     return response.json()
 
 
@@ -275,7 +271,6 @@ def show_subscription_details():
         "Authorization": authorization,
     }
     response = requests.get(url, headers=headers)
-    print('show_subscription_details:', response.json())
     return response.json()
 
 
@@ -289,5 +284,4 @@ def activate_subscription():
         'reason': 'Activating subscription by Jordan'
     }
     response = requests.post(url, headers=headers, data=json.dumps(data))
-    print('activate_subscription:', response.json())
     return response.json()

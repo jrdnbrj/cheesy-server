@@ -45,7 +45,7 @@ class ContactType(ObjectType):
 
 class CouponType(ObjectType):
     code = String()
-    discount = Decimal()
+    discount = String()
     is_active = Boolean()
 
 

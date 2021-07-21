@@ -35,7 +35,7 @@ class Contact(Document):
 
 class Coupon(Document):
     code = StringField(max_length=10, unique=True)
-    discount = DecimalField(precision=2)
+    discount = StringField()
     is_active = BooleanField(default=True)
 
 

@@ -32,15 +32,15 @@ class CreateCoupon(Mutation):
     response = String()
 
     def mutate(root, info, code=None, discount=None):
-        create_coupon(code=code, discount=discount)
-        return {'response': 'success'}
+        response = create_coupon(code=code, discount=discount)
+        return {'response': response}
 
 
 class DeleteCoupon(Mutation):
     class Arguments:
         code = String(required=True)
     
-    response = Boolean()
+    response = String()
 
     def mutate(root, info, code=None):
         response = delete_coupon(code)
@@ -51,7 +51,7 @@ class ActivateCoupon(Mutation):
     class Arguments:
         code = String(required=True)
     
-    response = Boolean()
+    response = String()
 
     def mutate(root, info, code=None):
         response = activate_coupon(code)
@@ -62,7 +62,7 @@ class DeactivateCoupon(Mutation):
     class Arguments:
         code = String(required=True)
     
-    response = Boolean()
+    response = String()
 
     def mutate(root, info, code=None):
         response = deactivate_coupon(code)
