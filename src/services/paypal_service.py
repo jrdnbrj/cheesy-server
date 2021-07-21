@@ -70,8 +70,31 @@ def create_order(amount):
                             "currency_code": "USD",
                             "value": str(amount)
                         },
+                        # "discount": {
+                        #     "currency_code": "USD",
+                        #     "value": "10.24"
+                        # },
                     }
-                }
+                },
+                
+                # "items": [
+                #     {
+                #         "name": "item1",
+                #         "unit_amount": {
+                #             "currency_code": "USD",
+                #             "value": "29.05"
+                #         }, 
+                #         "quantity": 1,
+                #     },
+                #     {
+                #         "name": "item2",
+                #         "unit_amount": {
+                #             "currency_code": "USD",
+                #             "value": "10"
+                #         }, 
+                #         "quantity": 2,
+                #     }
+                # ]
             }
         ]
     }

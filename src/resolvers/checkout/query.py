@@ -1,13 +1,13 @@
 from graphene import ObjectType
 from graphene import List
 
-from ..type import CheckoutContact
+from ..type import CouponType
 
-# from ...services.contact_service import get_contacts
+from ...services.checkout_service import get_coupons
 
 
 class Query(ObjectType):
-    get_coupons = List(CheckoutContact)
+    get_coupons = List(CouponType)
 
     def resolve_get_coupons(parent, info):
-        return {}
+        return get_coupons()

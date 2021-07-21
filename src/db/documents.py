@@ -3,6 +3,7 @@ from mongoengine.fields import (
     StringField,
     DecimalField,
     DictField,
+    BooleanField,
     DateTimeField,
     ListField,
     EmailField,
@@ -30,6 +31,12 @@ class Contact(Document):
     email = EmailField()
     phone = StringField()
     message = StringField()
+
+
+class Coupon(Document):
+    code = StringField(max_length=10, unique=True)
+    discount = DecimalField(precision=2)
+    is_active = BooleanField(default=True)
 
 
 class CheckoutInfoEmbedded(EmbeddedDocument):

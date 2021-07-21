@@ -43,6 +43,12 @@ class ContactType(ObjectType):
     message = String()
 
 
+class CouponType(ObjectType):
+    code = String()
+    discount = Decimal()
+    is_active = Boolean()
+
+
 class CheckoutInfoInputType(InputObjectType):
     name = String(required=True)
     phone = String(required=True)
