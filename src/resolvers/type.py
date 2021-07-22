@@ -79,6 +79,11 @@ class CouponType(ObjectType):
     is_active = Boolean()
 
 
+class SettingsType(ObjectType):
+    discount_month = String()
+    discount_2months = String()
+
+
 class CheckoutInfoInputType(InputObjectType):
     name = String(required=True)
     phone = String(required=True)

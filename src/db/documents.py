@@ -51,6 +51,12 @@ class Coupon(Document):
     is_active = BooleanField(default=True)
 
 
+class Settings(Document):
+    discount_month = StringField()
+    discount_2months = StringField()
+    password = StringField()
+
+
 class CheckoutInfoEmbedded(EmbeddedDocument):
     name = StringField()
     phone = StringField()
