@@ -5,6 +5,18 @@ from decouple import config
 from ..db.documents import Product
 
 
+def get_products():
+    products = Product.objects().order_by('sequence')
+
+    for product in products:
+        product.images = [config('URL') + "static/" + img for img in product.images]
+
+        for smoothie in product.smoothies:
+            smoothie[1] = config('URL') + "static/" + smoothie[1]
+    
+    return products
+
+
 def edit_product(**kwargs):
     try:
         path = kwargs.get('path')
@@ -39,16 +51,6 @@ def edit_product(**kwargs):
     except:
         return False
 
-def get_products():
-    products = Product.objects().order_by('sequence')
-
-    for product in products:
-        product.images = [config('URL') + "static/" + img for img in product.images]
-
-        for smoothie in product.smoothies:
-            smoothie[1] = config('URL') + "static/" + smoothie[1]
-    
-    return products
 
 def get_product_by_path(path):
     product = Product.objects(path=path).first()

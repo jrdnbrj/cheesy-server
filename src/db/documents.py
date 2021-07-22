@@ -33,6 +33,18 @@ class Contact(Document):
     message = StringField()
 
 
+class Home(Document):
+    name = StringField()
+    description = StringField()
+    sequence = IntField()
+
+
+class OurFamily(Document):
+    title = StringField()
+    description = StringField()
+    sequence = IntField()
+
+
 class Coupon(Document):
     code = StringField(max_length=10, unique=True)
     discount = StringField()

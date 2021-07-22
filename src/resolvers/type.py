@@ -1,5 +1,14 @@
 from graphene import ObjectType, InputObjectType
-from graphene import String, Decimal, List, Int, DateTime, JSONString, Boolean
+from graphene import (
+    String, 
+    Decimal, 
+    List, 
+    Int, 
+    DateTime, 
+    JSONString, 
+    Boolean
+)
+
 
 class SmoothieType(ObjectType):
     name = String()
@@ -18,7 +27,6 @@ class ProductType(ObjectType):
     price = Decimal()
     path = String()
     sequence = Int()
-
 
 
 class CartType(InputObjectType):
@@ -43,6 +51,28 @@ class ContactType(ObjectType):
     message = String()
 
 
+class HomeType(ObjectType):
+    name = String()
+    description = String()
+    sequence = Int()
+
+
+class HomeInputType(InputObjectType):
+    name = String()
+    description = String()
+
+
+class OurFamilyType(ObjectType):
+    title = String()
+    description = String()
+    sequence = Int()
+
+
+class OurFamilyInputType(InputObjectType):
+    title = String()
+    description = String()
+
+
 class CouponType(ObjectType):
     code = String()
     discount = String()
@@ -58,6 +88,7 @@ class CheckoutInfoInputType(InputObjectType):
     city = String(required=True)
     state = String(required=True)
     zip_code = String(required=True)
+
 
 class CheckoutInfoType(ObjectType):
     name = String(required=True)
