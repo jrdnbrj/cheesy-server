@@ -1,8 +1,8 @@
 from graphene import ObjectType, Mutation
 from graphene import String, Boolean
 
+from ...middleware import authentication_required
 from ..type import CheckoutInfoInputType
-
 from ...services.checkout_service import (
     create_checkout_contact, 
     create_coupon, 
@@ -19,6 +19,7 @@ class CreateCheckoutInfo(Mutation):
 
     response = String()
 
+    @authentication_required()
     def mutate(root, info, shipping_info, billing_info):
         create_checkout_contact(shipping=shipping_info, billing=billing_info)
         return {'response': 'success'}
@@ -31,6 +32,7 @@ class CreateCoupon(Mutation):
     
     response = String()
 
+    @authentication_required()
     def mutate(root, info, code=None, discount=None):
         response = create_coupon(code=code, discount=discount)
         return {'response': response}
@@ -42,6 +44,7 @@ class DeleteCoupon(Mutation):
     
     response = String()
 
+    @authentication_required()
     def mutate(root, info, code=None):
         response = delete_coupon(code)
         return {'response': response}
@@ -53,6 +56,7 @@ class ActivateCoupon(Mutation):
     
     response = String()
 
+    @authentication_required()
     def mutate(root, info, code=None):
         response = activate_coupon(code)
         return {'response': response}
@@ -64,6 +68,7 @@ class DeactivateCoupon(Mutation):
     
     response = String()
 
+    @authentication_required()
     def mutate(root, info, code=None):
         response = deactivate_coupon(code)
         return {'response': response}

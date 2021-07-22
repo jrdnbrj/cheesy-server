@@ -1,6 +1,8 @@
 from graphene import ObjectType
 from graphene import String, Field, JSONString, List
 
+from ...middleware import authentication_required
+from ..type import PayPalOrderType, CartType
 from ...services.paypal_service import (
     create_order, 
     capture_order, 
@@ -13,8 +15,6 @@ from ...services.paypal_service import (
     show_subscription_details,
     activate_subscription
 )
-
-from ..type import PayPalOrderType, CartType
 
 from decimal import Decimal
 
@@ -43,12 +43,15 @@ class Query(ObjectType):
         print('Capture Order:', order)
         return order
     
+    @authentication_required()
     def resolve_list_orders(parent, info):
         return list_orders()
 
+    @authentication_required()
     def resolve_list_products(parent, info):
         return list_products()
 
+    @authentication_required()
     def resolve_create_product(parent, info):
         return create_product()
     

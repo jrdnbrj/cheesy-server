@@ -1,9 +1,8 @@
 from graphene import ObjectType
 from graphene import String, Int, List, Field
 
-from ..type import ProductType
-
 from ...services.product_service import get_products, get_product_by_path
+from ..type import ProductType
 
 
 class Query(ObjectType):

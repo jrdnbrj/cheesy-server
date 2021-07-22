@@ -1,9 +1,8 @@
 from graphene import ObjectType
 from graphene import Field
 
-from ..type import SettingsType
-
 from ...services.settings_service import get_settings
+from ..type import SettingsType
 
 
 class Query(ObjectType):

@@ -1,6 +1,7 @@
 from graphene import ObjectType
 from graphene import String, Field, JSONString
 
+from ...middleware import authentication_required
 from ...services.square_service import (
     list_payments,
     create_payment, 
@@ -31,6 +32,7 @@ class Query(ObjectType):
     create_square_subscription = Field(String)
     list_invoices = Field(JSONString)
 
+    @authentication_required()
     def resolve_list_payments(parent, info):
         return list_payments()
 
@@ -38,36 +40,45 @@ class Query(ObjectType):
         amount = Decimal(amount)
         return create_payment(payment_token, round(amount * 100, 2))
 
+    @authentication_required()
     def resolve_list_customers(parent, info):
         return list_customers()
 
+    @authentication_required()
     def resolve_create_customer(parent, info):
         create_customer()
         return 'OK'
 
+    @authentication_required()
     def resolve_list_cards(parent, info):
         list_cards()
         return 'OK'
     
+    @authentication_required()
     def resolve_create_card(parent, info):
         create_card()
         return 'OK'
 
+    @authentication_required()
     def resolve_get_catalog_info(parent, info):
         get_catalog_info()
         return 'OK'
 
+    @authentication_required()
     def resolve_list_catalogs(parent, info):
         return list_catalogs()
 
+    @authentication_required()
     def resolve_upsert_catalog(parent, info):
         upsert_catalog()
         return 'OK'
 
+    @authentication_required()
     def resolve_create_square_subscription(parent, info):
         create_subscription()
         return 'OK'
 
+    @authentication_required()
     def resolve_list_invoices(parent, info):
         return list_invoices()
     

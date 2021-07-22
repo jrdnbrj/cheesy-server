@@ -1,5 +1,5 @@
 # GraphQL
-from starlette.graphql import GraphQLApp
+from graphene_prisma.starlette import GraphQLApp
 
 # Schema Definition
 from src.schema import schema
