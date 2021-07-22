@@ -84,6 +84,11 @@ class SettingsType(ObjectType):
     discount_2months = String()
 
 
+class InstagramMediaType(ObjectType):
+    url = String()
+    image = String()
+
+
 class CheckoutInfoInputType(InputObjectType):
     name = String(required=True)
     phone = String(required=True)
