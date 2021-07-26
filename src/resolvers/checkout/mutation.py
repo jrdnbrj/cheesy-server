@@ -1,14 +1,15 @@
 from graphene import ObjectType, Mutation
-from graphene import String, Boolean
+from graphene import String, List
 
 from ...middleware import authentication_required
-from ..type import CheckoutInfoInputType
+from ..type import CheckoutInfoInputType, ShippingStateInputType
 from ...services.checkout_service import (
     create_checkout_contact, 
     create_coupon, 
     delete_coupon,
     activate_coupon,
-    deactivate_coupon
+    deactivate_coupon,
+    update_shipping_values
 )
 
 
@@ -72,6 +73,19 @@ class DeactivateCoupon(Mutation):
     def mutate(root, info, code=None):
         response = deactivate_coupon(code)
         return {'response': response}
+
+
+class UpdateShippingStates(Mutation):
+    class Arguments:
+        data = List(ShippingStateInputType, required=True)
+    
+    response = String()
+
+    @authentication_required()
+    def mutate(root, info, data):
+        response = update_shipping_values(data)
+        return {'response': response}
+
 
 
 class Mutation(ObjectType):

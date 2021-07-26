@@ -116,6 +116,21 @@ class CheckoutContactType(ObjectType):
     billing_information = CheckoutInfoType()
 
 
+class ShippingStateType(ObjectType):
+    state = String()
+    value = Decimal()
+
+
+class ShippingStateInputType(ObjectType):
+    state = String()
+    value = Decimal()
+
+
+class ShippingResponseType(ObjectType):
+    response = Boolean()
+    value = String()
+
+
 class PayPalOrderType(ObjectType):
     order_id = String()
     status = String()

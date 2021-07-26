@@ -53,8 +53,6 @@ def get_instagram_media(count):
     return [to_instagram_type(post.url, post.to_dict()['display_url']) for post in posts]
 
 
-
-
 def to_base64(img):
     try:
         image = base64.b64encode(requests.get(img).content)

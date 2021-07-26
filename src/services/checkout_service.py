@@ -1,4 +1,4 @@
-from ..db.documents import CheckoutContact, Coupon
+from ..db.documents import CheckoutContact, Coupon, ShippingState
 
 
 def create_checkout_contact(shipping, billing):
@@ -56,3 +56,25 @@ def deactivate_coupon(code):
     except:
         return 'The coupon {} does not exist.'.format(code)
     
+def get_shippings():
+    return ShippingState.objects().order_by('state')
+
+def get_shipping_by_state(state):
+    shipping = ShippingState.objects(state=state.upper()).first()
+    
+    if not shipping:
+        return False, 'The state of shipping information is not available.'
+    
+    return True, shipping.value
+
+def update_shipping_values(values):
+    try:
+        shippings = ShippingState.objects().order_by('state')
+
+        for i, shipping in enumerate(shippings):
+            shipping.value = values[i]
+            shipping.save()
+
+        return True
+    except:
+        return False

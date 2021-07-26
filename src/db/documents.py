@@ -73,6 +73,11 @@ class CheckoutContact(Document):
     billing_information = EmbeddedDocumentField(CheckoutInfoEmbedded, required=True)
 
 
+class ShippingState(Document):
+    state = StringField(required=True, max_length=20, unique=True)
+    value = DecimalField(precision=2)
+
+
 class PayPalOrder(Document):
     order_id = StringField()
     status = StringField()
