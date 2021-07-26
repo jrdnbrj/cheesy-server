@@ -1,6 +1,7 @@
 from ..db.documents import Home, OurFamily
 
 from igramscraper.instagram import Instagram
+from instascrape import Profile
 
 import base64
 import requests
@@ -35,14 +36,23 @@ def update_family(data):
 
 
 def get_instagram_media(count):
-    instagram = Instagram()
+    cheesy = Profile('https://www.instagram.com/cheesybittes/')
 
-    medias = instagram.get_medias('cheesybittes', count)
+    headers = {
+        "user-agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Mobile Safari/537.36 Edg/87.0.664.57",
+        "cookie": "sessionid=1583011116%3AvLJT5bpqQICKOE%3A5;"
+    }
+
+    cheesy.scrape(headers=headers)
+
+    posts = cheesy.get_recent_posts(count)
 
     def to_instagram_type(url, image): 
         return { 'url': url, 'image': to_base64(image) }
 
-    return [to_instagram_type(media.link, media.image_high_resolution_url) for media in medias]
+    return [to_instagram_type(post.url, post.to_dict()['display_url']) for post in posts]
+
+
 
 
 def to_base64(img):

@@ -10,4 +10,4 @@ paypal-checkout-serversdk
 squareup # https://pypi.org/project/squareup/
 pyjwt # https://github.com/jpadilla/pyjwt
 graphene_prisma[starlette] # https://github.com/taoufik07/graphene-prisma
-igramscraper
+insta-scrape
