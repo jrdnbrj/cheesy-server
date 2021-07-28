@@ -39,6 +39,7 @@ class CartType(InputObjectType):
     bundle_up = Int()
     buy_once = Boolean()
     join_club = Boolean()
+    interval = Int()
     choose1 = String()
     choose3 = List(List(String))
 

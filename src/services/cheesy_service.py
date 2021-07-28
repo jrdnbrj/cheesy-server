@@ -1,6 +1,5 @@
 from ..db.documents import Home, OurFamily
 
-from igramscraper.instagram import Instagram
 from instascrape import Profile
 
 import base64

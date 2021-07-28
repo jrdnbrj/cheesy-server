@@ -35,6 +35,7 @@ class Cart(EmbeddedDocument):
     bundle_up = IntField()
     buy_once = BooleanField()
     join_club = BooleanField()
+    interval = IntField()
     choose1 = StringField()
     choose3 = ListField(ListField())
 
@@ -47,6 +48,7 @@ class Cart(EmbeddedDocument):
             "bundle_up": self.bundle_up,
             "buy_once": self.buy_once,
             "join_club": self.join_club,
+            "interval": self.interval,
             "choose1": self.choose1,
             "choose3": self.choose3
         }
@@ -164,6 +166,20 @@ class PayPalOrder(EmbeddedDocument):
         }
 
 
+class Square(EmbeddedDocument):
+    created_at = DateTimeField()
+    status = StringField()
+    buyer_email_address = StringField()
+    total_money = DecimalField(precision=2)
+
+    # PAYMENT FIELDS
+    payment_id = StringField()
+    
+    # SUBSCRIPTION FIELDS
+    subscription_id = StringField()
+    start_date = DateTimeField()
+
+
 class SquarePayment(EmbeddedDocument): # https://developer.squareup.com/reference/square/objects/Payment
     payment_id = StringField() # A unique ID for the payment, given by Square
     status = StringField() # APPROVED, PENDING, COMPLETED, CANCELED, or FAILED.
@@ -255,9 +271,25 @@ class SquarePaymentError(Document): # https://developer.squareup.com/reference/s
     created_at = DateTimeField(default=datetime.utcnow)
 
 
+class Subscription(Document):
+    id = StringField(primary_key=True)
+    card_id = StringField()
+    charged_through_date = DateTimeField()
+    created_at = StringField()
+    customer_id = StringField()
+    location_id = StringField()
+    plan_id = StringField()
+    start_date = StringField()
+    status = StringField()
+    tax_percent = StringField()
+    version = IntField()
+    updated_at = DateTimeField(default=datetime.utcnow)
+
+
 class Order(Document):
+    type = StringField(default='ONCE')
     cart = EmbeddedDocumentListField(Cart, required=True)
-    square = EmbeddedDocumentField(SquarePayment)
+    square = EmbeddedDocumentField(Square)
     paypal = EmbeddedDocumentField(PayPalOrder)
     checkout_info = EmbeddedDocumentField(CheckoutContactEmbedded, required=True)
     created_at = DateTimeField(default=datetime.utcnow)
