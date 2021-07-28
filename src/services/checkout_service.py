@@ -2,7 +2,16 @@ from ..db.documents import CheckoutContact, Coupon, ShippingState
 
 
 def create_checkout_contact(shipping, billing):
-    CheckoutContact(shipping_information=shipping, billing_information=billing).save()
+    contact = CheckoutContact(shipping_information=shipping, billing_information=billing)
+    contact.save()
+    return contact
+
+def get_checkout_contact(id):
+    try:
+        contact = CheckoutContact.objects(id=id).first()
+        return contact
+    except:
+        return False
 
 def get_coupons():
     return Coupon.objects()

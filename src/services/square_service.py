@@ -1,4 +1,6 @@
-from ..db.documents import SquarePayment, SquarePaymentError
+from ..db.documents import SquarePaymentError, Order
+
+from .checkout_service import get_checkout_contact
 
 from square.client import Client
 
@@ -8,6 +10,7 @@ from datetime import datetime
 from decimal import Decimal
 import uuid
 import math
+
 
 client = Client(
     access_token=config('SQUARE_ACCESS_TOKEN'), 
@@ -26,7 +29,81 @@ def list_payments():
         raise Exception('Error in list_payments: {}'.format(result.errors[0].get('detail')))
 
 
-def create_payment(payment_token, amount):
+def to_payment_object(data):
+    card_details = data.get('card_details', {})
+    card_payment_timeline = card_details.get('card_payment_timeline', {})
+    datetime_format = "%Y-%m-%dT%H:%M:%S.%fZ"
+    datetime_default = "2000-01-01T00:00:00.0Z"
+    
+    def to_datetime(key_from, key): 
+        date_time = key_from.get(key, datetime_default)
+        return datetime.strptime(date_time, datetime_format)
+
+    return {
+        "payment_id": data.get('id'),
+        "status": data.get('status'),
+        "source_type": data.get('source_type'),
+        "amount_money": data.get('amount_money', {}).get('amount'),
+        "tip_money": Decimal(data.get('tip_money', {}).get('amount', -100)),
+        "approved_money": Decimal(data.get('approved_money').get('amount', -100)),
+        "total_money": Decimal(data.get('total_money', {}).get('amount', -100)),
+        "fee_money": Decimal(data.get('app_fee_money', {}).get('amount', -100)),
+        "avs_status": card_details.get('avs_status'),
+        "card": card_details.get('card'),
+        "card_status": card_details.get('status'),
+        "card_error": card_details.get('errors'),
+        "created_at": to_datetime(data, 'created_at'),
+        "authorized_at": to_datetime(card_payment_timeline, 'authorized_at'),
+        "captured_at": to_datetime(card_payment_timeline, 'captured_at'),
+        "voided_at": to_datetime(card_payment_timeline, 'voided_at'),
+        "updated_at": to_datetime(data, 'updated_at'),
+        "cvv_status": card_details.get('cvv_status'),
+        "entry_method": card_details.get('entry_method'),
+        "statement_description": card_details.get('statement_description'),
+        "verification_method": card_details.get('verification_method'),
+        "verification_results": card_details.get('verification_results'),
+        "delay_action": data.get('delay_action'),
+        "delay_duration": data.get('delay_duration'),
+        "delayed_until": to_datetime(data, 'delayed_until'),
+        "order_id": data.get('order_id'),
+        "location_id": data.get('location_id'),
+        "receipt_number": data.get('receipt_number'),
+        "risk_evaluation": data.get('risk_evaluation'),
+        "buyer_email_address": data.get('buyer_email_address'),
+        "billing_address": data.get('billing_address'),
+        "shipping_address": data.get('shipping_address'),
+        "note": data.get('note'),
+        "version_token": data.get('version_token')
+    }
+
+
+def to_cart_object(cart):
+    new_cart = []
+    for item in cart:
+        new_item = {
+            "amount": item.amount,
+            "price": item.price,
+            "name": item.name,
+            "total": item.total,
+            "bundle_up": item.bundle_up,
+            "buy_once": item.buy_once,
+            "join_club": item.join_club,
+            "choose1": item.choose1,
+            "choose3": item.choose3
+        }
+        new_cart.append(new_item)
+    
+    return new_cart
+
+
+def create_payment(payment_token, amount, cart, id):
+
+    print('Cart:', type(cart), cart)
+
+    contact = get_checkout_contact(id)
+    shipping = contact.shipping_information
+    billing = contact.billing_information
+
     idempotency_key = str(uuid.uuid4())
     amount = math.trunc(amount)
 
@@ -36,64 +113,41 @@ def create_payment(payment_token, amount):
         "amount_money": {
             "amount": amount,
             "currency": "USD"
-        }
+        },
+        "buyer_email_address": billing.email,
+        "shipping_address": {
+            "address_line_1": shipping.address,
+            "address_line_2": shipping.address2,
+            "city": shipping.city,
+            "state_or_province": shipping.state,
+            "postal_code": shipping.zip_code,
+            "country": "US",
+            "first_name": shipping.name,
+        },
+        "billing_address": {
+            "address_line_1": billing.address,
+            "address_line_2": billing.address2,
+            "city": billing.city,
+            "state_or_province": billing.state,
+            "postal_code": billing.zip_code,
+            "country": "US",
+            "first_name": billing.name,
+        },
     }
     result = client.payments.create_payment(body=body)
     
     if result.is_success():
-        data = result.body['payment']
+        order = Order(
+            cart=to_cart_object(cart), 
+            square=to_payment_object(result.body['payment']), 
+            checkout_info=contact.to_json()
+        ).save()
         
-        card_details = data.get('card_details', {})
-        card_payment_timeline = card_details.get('card_payment_timeline', {})
-        datetime_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        datetime_default = "2000-01-01T00:00:00.0Z"
-        
-        def to_datetime(key_from, key): 
-            date_time = key_from.get(key, datetime_default)
-            return datetime.strptime(date_time, datetime_format)
+        return order.square.status
 
-        new_payment = SquarePayment(
-            payment_id = data.get('id'),
-            status = data.get('status'),
-            source_type = data.get('source_type'),
-            amount_money = data.get('amount_money', {}).get('amount'),
-            tip_money = Decimal(data.get('tip_money', {}).get('amount', -100)),
-            approved_money = Decimal(data.get('approved_money').get('amount', -100)),
-            total_money = Decimal(data.get('total_money', {}).get('amount', -100)),
-            fee_money = Decimal(data.get('app_fee_money', {}).get('amount', -100)),
-            avs_status = card_details.get('avs_status'),
-            card = card_details.get('card'),
-            card_status = card_details.get('status'),
-            card_error = card_details.get('errors'),
-            created_at = to_datetime(data, 'created_at'),
-            authorized_at = to_datetime(card_payment_timeline, 'authorized_at'),
-            captured_at = to_datetime(card_payment_timeline, 'captured_at'),
-            voided_at = to_datetime(card_payment_timeline, 'voided_at'),
-            updated_at = to_datetime(data, 'updated_at'),
-            cvv_status = card_details.get('cvv_status'),
-            entry_method = card_details.get('entry_method'),
-            statement_description = card_details.get('statement_description'),
-            verification_method = card_details.get('verification_method'),
-            verification_results = card_details.get('verification_results'),
-            delay_action = data.get('delay_action'),
-            delay_duration = data.get('delay_duration'),
-            delayed_until = to_datetime(data, 'delayed_until'),
-            order_id = data.get('order_id'),
-            location_id = data.get('location_id'),
-            receipt_number = data.get('receipt_number'),
-            risk_evaluation = data.get('risk_evaluation'),
-            buyer_email_address = data.get('buyer_email_address'),
-            billing_address = data.get('billing_address'),
-            shipping_address = data.get('shipping_address'),
-            note = data.get('note'),
-            version_token = data.get('version_token')
-        )
-        new_payment.save()
-
-        return data.get('status')
     elif result.is_error():
         for error in result.errors:
-            new_payment_error = SquarePaymentError(
+            SquarePaymentError(
                 category = error.get('category'),
                 code = error.get('code'),
                 detail = error.get('detail'),
@@ -101,8 +155,7 @@ def create_payment(payment_token, amount):
                 payment_token = payment_token,
                 amount = amount,
                 idempotency_key = idempotency_key
-            )
-            new_payment_error.save()
+            ).save()
         raise Exception('Error in create_payment: {}'.format(result.errors[0].get('detail')))
 
 
@@ -248,6 +301,10 @@ def create_subscription():
     elif result.is_error():
         print('Error:', result.errors)
         raise Exception('Error in create_subscription: {}'.format(result.errors[0].get('detail')))
+
+
+def init_subscription():
+    pass
 
 
 # INVOICES

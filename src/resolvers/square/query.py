@@ -1,6 +1,7 @@
 from graphene import ObjectType
-from graphene import String, Field, JSONString
+from graphene import String, Field, JSONString, List
 
+from ..type import CartType
 from ...middleware import authentication_required
 from ...services.square_service import (
     list_payments,
@@ -21,7 +22,8 @@ from decimal import Decimal
 
 class Query(ObjectType):
     list_payments = Field(JSONString)
-    create_payment = Field(String, payment_token=String(required=True), amount=String(required=True))
+    create_payment = Field(String, payment_token=String(required=True), amount=String(required=True), 
+        cart=List(CartType, required=True), id=String(required=True))
     list_customers = Field(JSONString)
     create_customer = Field(String)
     list_cards = Field(String)
@@ -36,9 +38,9 @@ class Query(ObjectType):
     def resolve_list_payments(parent, info):
         return list_payments()
 
-    def resolve_create_payment(parent, info, payment_token, amount):
+    def resolve_create_payment(parent, info, payment_token, amount, cart, id):
         amount = Decimal(amount)
-        return create_payment(payment_token, round(amount * 100, 2))
+        return create_payment(payment_token, round(amount * 100, 2), cart, id)
 
     @authentication_required()
     def resolve_list_customers(parent, info):

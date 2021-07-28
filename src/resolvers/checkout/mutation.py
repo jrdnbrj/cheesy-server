@@ -1,5 +1,6 @@
 from graphene import ObjectType, Mutation
 from graphene import String, List
+from graphene.types.scalars import Boolean
 
 from ...middleware import authentication_required
 from ..type import CheckoutInfoInputType, ShippingStateInputType
@@ -18,12 +19,13 @@ class CreateCheckoutInfo(Mutation):
         shipping_info = CheckoutInfoInputType()
         billing_info = CheckoutInfoInputType()
 
-    response = String()
+    response = Boolean()
+    id = String()
 
     @authentication_required()
     def mutate(root, info, shipping_info, billing_info):
-        create_checkout_contact(shipping=shipping_info, billing=billing_info)
-        return {'response': 'success'}
+        contact = create_checkout_contact(shipping=shipping_info, billing=billing_info)
+        return {'response': True, 'id': contact.id}
 
 
 class CreateCoupon(Mutation):
