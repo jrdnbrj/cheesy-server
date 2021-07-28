@@ -8,6 +8,7 @@ from .resolvers.contact.query import Query as contact_query
 from .resolvers.checkout.query import Query as checkout_query
 from .resolvers.cheesy.query import Query as cheesy_query
 from .resolvers.settings.query import Query as settings_query
+from .resolvers.order.query import Query as order_query
 
 # mutations
 from .resolvers.product.mutation import Mutation as product_mutation
@@ -25,6 +26,7 @@ class Query(
     checkout_query,
     cheesy_query,
     settings_query,
+    order_query,
     ObjectType
 ): pass
 

@@ -1,4 +1,4 @@
-from ..db.documents import SquarePaymentError, Order, Subscription
+from ..db.documents import SquarePaymentError, Order
 
 from .checkout_service import get_checkout_contact
 
@@ -27,12 +27,10 @@ def list_payments():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_payments: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in list_payments: {}'.format(result.errors[0]))
 
 
 def create_payment(payment_token, amount, contact_id, cart, shipping_value, discount):
-
-    print('Cart:', type(cart), cart)
 
     if not validate_amount(cart, shipping_value, discount, amount):
         raise Exception("Amount does not match with Cart's items")
@@ -46,8 +44,8 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
     idempotency_key = str(uuid.uuid4())
     amount = math.trunc(amount * 100)
 
-    customer_id = create_customer(billing)
-    card_id = create_card(payment_token, customer_id)
+    customer_id = create_customer(billing, amount)
+    card_id = create_card(payment_token, customer_id, amount)
 
     body = {
         "source_id": card_id,
@@ -75,7 +73,7 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
             "postal_code": billing.zip_code,
             "country": "US",
             "first_name": billing.name,
-        },
+        }
     }
     result = client.payments.create_payment(body=body)
     
@@ -87,22 +85,30 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
         ).save()
 
         if subscription != []:
-            init_subscription(payment_token, subscription, shipping, contact, customer_id, card_id)
+            response = init_subscription(subscription, shipping_value, contact, customer_id, card_id)
+
+            if not response:
+                return 'An error has occurred with Square Server. The first payment has been completed successfully but the Cheesy Bittes Club subscriptions may not have been generated. Please Contact Us'
+
+        if order.square.status != 'COMPLETED':
+            return 'An error may have occurred with your order, please contact us. Status: '.format(order.square.status)
 
         return order.square.status
 
     elif result.is_error():
         for error in result.errors:
+            print('Error in create_payment: ', error)
             SquarePaymentError(
                 category = error.get('category'),
                 code = error.get('code'),
                 detail = error.get('detail'),
                 field = error.get('field'),
-                payment_token = payment_token,
-                amount = amount,
-                idempotency_key = idempotency_key
+                customer_id = customer_id,
+                card_id = card_id,
+                amount = amount / 100,
+                type = 'ONCE'
             ).save()
-        raise Exception('Error in create_payment: {}'.format(result.errors[0].get('detail')))
+        return 'An error has occurred. No payment has been made. Please try again.'
 
 
 # CUSTOMERS
@@ -114,10 +120,10 @@ def list_customers():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_customers: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in list_customers: {}'.format(result.errors[0]))
 
 
-def create_customer(billing):
+def create_customer(billing, amount):
     result = client.customers.create_customer(
         body = {
             "given_name": billing.name,
@@ -136,12 +142,20 @@ def create_customer(billing):
     )
 
     if result.is_success():
-        print(result.body, type(result.body))
-        print('ID:', result.body['customer']['id'])
+        print('Customer ID:', result.body['customer']['id'])
         return result.body['customer']['id']
     elif result.is_error():
-        print(result.errors)
-        raise Exception('Error in create_customer: {}'.format(result.errors[0].get('detail')))
+        for error in result.errors:
+            print('Error in create_customer: ', error)
+            SquarePaymentError(
+                category = error.get('category'),
+                code = error.get('code'),
+                detail = error.get('detail'),
+                field = error.get('field'),
+                amount = amount / 100,
+                type = 'CREATE_CUSTOMER'
+            ).save()
+        return 'An error has occurred. No payment has been made. Please try again.'
 
 
 # CARDS
@@ -153,10 +167,10 @@ def list_cards():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_cards: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in list_cards: {}'.format(result.errors[0]))
 
 
-def create_card(payment_token, customer_id):
+def create_card(payment_token, customer_id, amount):
     idempotency_key = str(uuid.uuid4())
     result = client.cards.create_card(
         body = {
@@ -169,12 +183,20 @@ def create_card(payment_token, customer_id):
     )
 
     if result.is_success():
-        print(result.body)
         print('Card ID:', result.body['card']['id'])
         return result.body['card']['id']
     elif result.is_error():
-        print(result.errors)
-        raise Exception('Error in create_card: {}'.format(result.errors[0].get('detail')))
+        for error in result.errors:
+            print('Error in create_card: ', error)
+            SquarePaymentError(
+                category = error.get('category'),
+                code = error.get('code'),
+                detail = error.get('detail'),
+                field = error.get('field'),
+                amount = amount / 100,
+                type = 'CREATE_CARD'
+            ).save()
+        return 'An error has occurred. No payment has been made. Please try again.'
 
 
 # CATALOGS
@@ -186,7 +208,7 @@ def get_catalog_info():
         print(result.body)
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in get_catalog_info.: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in get_catalog_info.: {}'.format(result.errors[0]))
 
 
 def list_catalogs():
@@ -196,13 +218,12 @@ def list_catalogs():
         return result.body
     elif result.is_error():
         print('Error:', result.errors)
-        raise Exception('Error in list_catalogs: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in list_catalogs: {}'.format(result.errors[0]))
 
 
-def upsert_catalog(cadence, amount):
+def upsert_catalog(cadence, amount, customer_id, card_id):
     idempotency_key = str(uuid.uuid4())
     plan_object_id = '#{}'.format(str(uuid.uuid4()))
-    print('plan_object_id:', plan_object_id)
 
     result = client.catalog.upsert_catalog_object(
         body = {
@@ -227,22 +248,30 @@ def upsert_catalog(cadence, amount):
     )
 
     if result.is_success():
-        print('Result:', result.body)
-        print('Catalog ID:', result.body['catalog_object']['id'])
+        print('Plan ID:', result.body['catalog_object']['id'])
         return result.body['catalog_object']['id']
     elif result.is_error():
-        print('Error:', result.errors)
-        raise Exception('Error in upsert_catalog: {}'.format(result.errors[0].get('detail')))
+        for error in result.errors:
+            print('Error in upsert_catalog: ', error)
+            SquarePaymentError(
+                category = error.get('category'),
+                code = error.get('code'),
+                detail = error.get('detail'),
+                field = error.get('field'),
+                amount = amount / 100,
+                customer_id = customer_id,
+                card_id = card_id,
+                type = 'CREATE_PLAN'
+            ).save()
+        return 'An error has occurred. No payment has been made. Please try again.'
 
 
 # SUBSCRIPTIONS
 
-def create_subscription(plan_id, customer_id, card_id, interval):
+def create_subscription(plan_id, customer_id, card_id, interval, amount):
     idempotency_key = str(uuid.uuid4())
 
-    today = date.today()
-    # start_date = today + relativedelta(months=interval)
-    start_date = today + relativedelta(days=interval)
+    start_date = date.today() + relativedelta(months=interval)
 
     result = client.subscriptions.create_subscription(
         body = {
@@ -257,42 +286,79 @@ def create_subscription(plan_id, customer_id, card_id, interval):
     )
 
     if result.is_success():
-        print('Result:', result.body)
-        return result.body
+        print('Subscription ID:', result.body['subscription']['id'])
+        return result.body['subscription']
     elif result.is_error():
-        print('Error:', result.errors)
-        raise Exception('Error in create_subscription: {}'.format(result.errors[0].get('detail')))
+        for error in result.errors:
+            print('Error in create_subscription: ', error)
+            SquarePaymentError(
+                category = error.get('category'),
+                code = error.get('code'),
+                detail = error.get('detail'),
+                field = error.get('field'),
+                amount = amount / 100,
+                customer_id = customer_id,
+                card_id = card_id,
+                type = 'SUBSCRIPTION',
+            ).save()
+        return 'An error has occurred. No payment has been made. Please try again.'
 
 
-def init_subscription(payment_token, cart, shipping, contact, customer_id, card_id):
-    print('Init Subscription.')
+def init_subscription(cart, shipping_value, contact, customer_id, card_id):
     monthly, two_months = monthly_two_months(cart)
     
-    print('Monthly:', monthly)
-    print('Two Months:', two_months)
-    
     try:
-        if monthly:
-            plan_id = upsert_catalog('DAILY', 230) # MONTHLY
-            subscription = create_subscription(plan_id, customer_id, card_id, 1)
+        if monthly != []:
+            subtotal = 0
+            for item in monthly:
+                price = round(Decimal(item['price']), 2)
+                quantity = round(Decimal(item['amount']), 2)
+                subtotal += price * quantity
+
+            total = subtotal + round(Decimal(shipping_value), 2)
+            total = math.trunc(total * 100)
+
+            plan_id = upsert_catalog('MONTHLY', total, customer_id, card_id)
+            subscription = create_subscription(plan_id, customer_id, card_id, 1, total)
+
             Order(
                 type="SUBSCRIPTION",
-                cart=to_cart_object(cart), 
-                square=to_subscription_object(subscription, contact.billing_information.email, 230), 
+                cart=to_cart_object(monthly), 
+                square=to_subscription_object(subscription, contact.billing_information.email, total), 
                 checkout_info=contact.to_json()
             ).save()
 
-        if two_months:
-            plan_id = upsert_catalog('DAILY', 1242) # EVERY_TWO_MONTHS
-            subscription = create_subscription(plan_id, customer_id, card_id, 2)
+        if two_months != []:
+            subtotal = 0
+            for item in two_months:
+                price = round(Decimal(item['price']), 2)
+                quantity = round(Decimal(item['amount']), 2)
+                subtotal += price * quantity
+
+            total = subtotal + round(Decimal(shipping_value), 2)
+            total = math.trunc(total * 100)
+
+            plan_id = upsert_catalog('EVERY_TWO_MONTHS', total, customer_id, card_id)
+            subscription = create_subscription(plan_id, customer_id, card_id, 2, total)
+
             Order(
                 type="SUBSCRIPTION",
-                cart=to_cart_object(cart), 
-                square=to_subscription_object(subscription, contact.billing_information.email, 1242), 
+                cart=to_cart_object(two_months), 
+                square=to_subscription_object(subscription, contact.billing_information.email, total), 
                 checkout_info=contact.to_json()
             ).save()
-    except:
-        raise Exception('Error in init_subscription.')
+
+        return True
+    except Exception as e:
+        print('Error in init_subscription:', e)
+        SquarePaymentError(
+            detail = str(e),
+            amount = total / 100,
+            customer_id = customer_id,
+            card_id = card_id,
+            type = 'SUBSCRIPTION',
+        ).save()
+        return False
 
 
 
@@ -305,7 +371,7 @@ def list_invoices():
         return result.body
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in list_invoices: {}'.format(result.errors[0].get('detail')))
+        raise Exception('Error in list_invoices: {}'.format(result.errors[0]))
 
 
 # UTILS
@@ -344,7 +410,7 @@ def checkout_subscription(cart):
 
 def to_subscription_object(data, email, amount):
     return {
-        "created_at": datetime.strptime(data.get('created_at', '2000-01-01T00:00:00.0Z'), '%Y-%m-%dT%H:%M:%S.%fZ'),
+        "created_at": datetime.strptime(data.get('created_at', '2000-01-01T00:00:00.0Z'), '%Y-%m-%dT%H:%M:%SZ'),
         "status": data.get('status'),
         "buyer_email_address": email,
         "subscription_id": data.get('id'),
@@ -354,8 +420,6 @@ def to_subscription_object(data, email, amount):
 
 
 def to_payment_object(data):
-    # card_details = data.get('card_details', {})
-    # card_payment_timeline = card_details.get('card_payment_timeline', {})
     datetime_format = "%Y-%m-%dT%H:%M:%S.%fZ"
     datetime_default = "2000-01-01T00:00:00.0Z"
     
@@ -370,43 +434,6 @@ def to_payment_object(data):
         "created_at": to_datetime(data, 'created_at'),
         "buyer_email_address": data.get('buyer_email_address'),
     }
-
-    # return {
-    #     "payment_id": data.get('id'),
-    #     "status": data.get('status'),
-    #     "source_type": data.get('source_type'),
-    #     "amount_money": data.get('amount_money', {}).get('amount'),
-    #     "tip_money": Decimal(data.get('tip_money', {}).get('amount', -100)),
-    #     "approved_money": Decimal(data.get('approved_money').get('amount', -100)),
-    #     "total_money": Decimal(data.get('total_money', {}).get('amount', -100)),
-    #     "fee_money": Decimal(data.get('app_fee_money', {}).get('amount', -100)),
-    #     "avs_status": card_details.get('avs_status'),
-    #     "card": card_details.get('card'),
-    #     "card_status": card_details.get('status'),
-    #     "card_error": card_details.get('errors'),
-    #     "created_at": to_datetime(data, 'created_at'),
-    #     "authorized_at": to_datetime(card_payment_timeline, 'authorized_at'),
-    #     "captured_at": to_datetime(card_payment_timeline, 'captured_at'),
-    #     "voided_at": to_datetime(card_payment_timeline, 'voided_at'),
-    #     "updated_at": to_datetime(data, 'updated_at'),
-    #     "cvv_status": card_details.get('cvv_status'),
-    #     "entry_method": card_details.get('entry_method'),
-    #     "statement_description": card_details.get('statement_description'),
-    #     "verification_method": card_details.get('verification_method'),
-    #     "verification_results": card_details.get('verification_results'),
-    #     "delay_action": data.get('delay_action'),
-    #     "delay_duration": data.get('delay_duration'),
-    #     "delayed_until": to_datetime(data, 'delayed_until'),
-    #     "order_id": data.get('order_id'),
-    #     "location_id": data.get('location_id'),
-    #     "receipt_number": data.get('receipt_number'),
-    #     "risk_evaluation": data.get('risk_evaluation'),
-    #     "buyer_email_address": data.get('buyer_email_address'),
-    #     "billing_address": data.get('billing_address'),
-    #     "shipping_address": data.get('shipping_address'),
-    #     "note": data.get('note'),
-    #     "version_token": data.get('version_token')
-    # }
 
 
 def to_cart_object(cart):
@@ -440,3 +467,7 @@ def monthly_two_months(cart):
             two_months.append(item)
         
     return monthly, two_months
+
+
+def list_square_errors():
+    return SquarePaymentError.objects()

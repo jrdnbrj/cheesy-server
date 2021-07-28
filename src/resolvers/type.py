@@ -6,7 +6,8 @@ from graphene import (
     Int, 
     DateTime, 
     JSONString, 
-    Boolean
+    Boolean,
+    Field
 )
 
 
@@ -29,11 +30,24 @@ class ProductType(ObjectType):
     sequence = Int()
 
 
-class CartType(InputObjectType):
+class CartInputType(InputObjectType):
     path = String()
     amount = Int(required=True)
     price = Decimal(required=True)
     image = String()
+    name = String()
+    total = Decimal(required=True)
+    bundle_up = Int()
+    buy_once = Boolean()
+    join_club = Boolean()
+    interval = Int()
+    choose1 = String()
+    choose3 = List(List(String))
+
+
+class CartType(ObjectType):
+    amount = Int(required=True)
+    price = Decimal(required=True)
     name = String()
     total = Decimal(required=True)
     bundle_up = Int()
@@ -117,6 +131,11 @@ class CheckoutContactType(ObjectType):
     billing_information = CheckoutInfoType()
 
 
+class CheckoutContactTypeF(ObjectType):
+    shipping_information = Field(CheckoutInfoType)
+    billing_information = Field(CheckoutInfoType)
+
+
 class ShippingStateType(ObjectType):
     state = String()
     value = Decimal()
@@ -130,6 +149,32 @@ class ShippingStateInputType(ObjectType):
 class ShippingResponseType(ObjectType):
     response = Boolean()
     value = String()
+
+
+class SquareType(ObjectType):
+    created_at = DateTime()
+    status = String()
+    buyer_email_address = String()
+    total_money = Decimal()
+
+    # PAYMENT FIELDS
+    payment_id = String()
+    
+    # SUBSCRIPTION FIELDS
+    subscription_id = String()
+    start_date = DateTime()
+
+
+class SquarePaymentErrorType(ObjectType):
+    category = String()
+    code = String()
+    detail = String()
+    field = String()
+    customer_id = String()
+    card_id = String()
+    amount = Decimal()
+    type = String()
+    created_at = DateTime()
 
 
 class PayPalOrderType(ObjectType):
@@ -148,3 +193,12 @@ class PayPalOrderType(ObjectType):
     capture_time = DateTime()
     create_time = DateTime()
     update_time = DateTime()
+
+
+class OrderType(ObjectType):
+    type = String()
+    cart = List(CartType)
+    square = Field(SquareType)
+    paypal = Field(PayPalOrderType)
+    checkout_info = Field(CheckoutContactTypeF)
+    created_at = DateTime()

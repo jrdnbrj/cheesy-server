@@ -2,7 +2,7 @@ from graphene import ObjectType
 from graphene import String, Field, JSONString, List
 
 from ...middleware import authentication_required
-from ..type import PayPalOrderType, CartType
+from ..type import PayPalOrderType, CartInputType
 from ...services.paypal_service import (
     create_order, 
     capture_order, 
@@ -21,7 +21,7 @@ from decimal import Decimal
 
 class Query(ObjectType):
     create_order = Field(String, amount=String(required=True))
-    capture_order = Field(JSONString, order_id=String(required=True), cart=List(CartType, required=True))
+    capture_order = Field(JSONString, order_id=String(required=True), cart=List(CartInputType, required=True))
     list_orders = List(PayPalOrderType)
     list_products = Field(JSONString)
     create_product = Field(JSONString)

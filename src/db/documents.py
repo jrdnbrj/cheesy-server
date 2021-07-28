@@ -265,9 +265,10 @@ class SquarePaymentError(Document): # https://developer.squareup.com/reference/s
     code = StringField() # The specific code of the error. | ... see above url
     detail = StringField() # A human-readable description of the error for debugging purposes.
     field = StringField() # The name of the field provided in the original request (if any) that the error pertains to.
-    payment_token = StringField()
+    customer_id = StringField()
+    card_id = StringField()
     amount = DecimalField(precision=2)
-    idempotency_key = StringField()
+    type = StringField() # The type of transaction
     created_at = DateTimeField(default=datetime.utcnow)
 
 
