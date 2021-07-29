@@ -129,7 +129,7 @@ class ShippingState(Document):
     value = DecimalField(precision=2)
 
 
-class PayPalOrder(EmbeddedDocument):
+class PayPal(EmbeddedDocument):
     order_id = StringField()
     status = StringField()
     value = DecimalField(precision=2)
@@ -146,24 +146,24 @@ class PayPalOrder(EmbeddedDocument):
     create_time = DateTimeField()
     update_time = DateTimeField()
 
-    def to_json(self):
-        return {
-            "order_id": self.order_id,
-            "status": self.status,
-            "value": self.value,
-            "name": self.name,
-            "surname": self.surname,
-            "full_name": self.full_name,
-            "payer_id": self.payer_id,
-            "email": self.email,
-            "address": self.address,
-            "capture_id": self.capture_id,
-            "capture_status": self.capture_status,
-            "purchase_breakdown": self.purchase_breakdown,
-            "capture_time": self.capture_time,
-            "create_time": self.create_time,
-            "update_time": self.update_time
-        }
+    # def to_json(self):
+    #     return {
+    #         "order_id": self.order_id,
+    #         "status": self.status,
+    #         "value": self.value,
+    #         "name": self.name,
+    #         "surname": self.surname,
+    #         "full_name": self.full_name,
+    #         "payer_id": self.payer_id,
+    #         "email": self.email,
+    #         "address": self.address,
+    #         "capture_id": self.capture_id,
+    #         "capture_status": self.capture_status,
+    #         "purchase_breakdown": self.purchase_breakdown,
+    #         "capture_time": self.capture_time,
+    #         "create_time": self.create_time,
+    #         "update_time": self.update_time
+    #     }
 
 
 class Square(EmbeddedDocument):
@@ -291,6 +291,6 @@ class Order(Document):
     type = StringField(default='ONCE')
     cart = EmbeddedDocumentListField(Cart, required=True)
     square = EmbeddedDocumentField(Square)
-    paypal = EmbeddedDocumentField(PayPalOrder)
+    paypal = EmbeddedDocumentField(PayPal)
     checkout_info = EmbeddedDocumentField(CheckoutContactEmbedded, required=True)
     created_at = DateTimeField(default=datetime.utcnow)
