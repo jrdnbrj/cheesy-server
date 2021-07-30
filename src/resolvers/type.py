@@ -95,8 +95,8 @@ class CouponType(ObjectType):
 
 
 class SettingsType(ObjectType):
-    discount_month = String()
-    discount_2months = String()
+    discount_month = Decimal()
+    discount_2months = Decimal()
 
 
 class InstagramMediaType(ObjectType):
@@ -137,11 +137,6 @@ class CheckoutContactTypeF(ObjectType):
 
 
 class ShippingStateType(ObjectType):
-    state = String()
-    value = Decimal()
-
-
-class ShippingStateInputType(ObjectType):
     state = String()
     value = Decimal()
 

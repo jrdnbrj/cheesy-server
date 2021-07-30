@@ -80,8 +80,8 @@ class Coupon(Document):
 
 
 class Settings(Document):
-    discount_month = StringField()
-    discount_2months = StringField()
+    discount_month = DecimalField(precision=1)
+    discount_2months = DecimalField(precision=1)
     password = StringField()
 
 

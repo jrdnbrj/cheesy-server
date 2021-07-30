@@ -3,7 +3,7 @@ from graphene import String, List
 from graphene.types.scalars import Boolean
 
 from ...middleware import authentication_required
-from ..type import CheckoutInfoInputType, ShippingStateInputType
+from ..type import CheckoutInfoInputType
 from ...services.checkout_service import (
     create_checkout_contact, 
     create_coupon, 
@@ -79,13 +79,13 @@ class DeactivateCoupon(Mutation):
 
 class UpdateShippingStates(Mutation):
     class Arguments:
-        data = List(ShippingStateInputType, required=True)
+        values = List(String, required=True)
     
     response = String()
 
     @authentication_required()
-    def mutate(root, info, data):
-        response = update_shipping_values(data)
+    def mutate(root, info, values):
+        response = update_shipping_values(values)
         return {'response': response}
 
 
@@ -96,3 +96,4 @@ class Mutation(ObjectType):
     delete_coupon = DeleteCoupon.Field()
     activate_coupon = ActivateCoupon.Field()
     deactivate_coupon = DeactivateCoupon.Field()
+    update_shipping = UpdateShippingStates.Field()
