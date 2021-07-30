@@ -20,7 +20,7 @@ def verify_password(password):
     if response['password'] == password:
         return True, settings, 'OK'
     else:
-        return False, '', 'Incorrect Password.'
+        return False, '', 'Your current password is incorrect.'
 
 def get_settings():
     return Settings.objects().first()
@@ -38,15 +38,15 @@ def update_discounts(month, two_months):
     return response
 
 def update_password(password, new_password):
-    if len(new_password) < 8:
-        return 'Password must be at least 8 characters long.'
-
-    if len(new_password) > 20:
-        return 'Password must be less than 20 characters long.'
-
     success, settings, message = verify_password(password)
 
     if success:
+        if len(new_password) < 8:
+            return 'New password must be at least 8 characters long.'
+
+        if len(new_password) > 20:
+            return 'New password must be less than 20 characters long.'
+
         settings.password = encrypt_password(new_password)
         settings.save()
         return 'OK'
