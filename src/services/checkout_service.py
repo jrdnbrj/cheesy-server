@@ -1,5 +1,7 @@
 from ..db.documents import CheckoutContact, Coupon, ShippingState
 
+from decimal import Decimal
+
 
 def create_checkout_contact(shipping, billing):
     contact = CheckoutContact(shipping_information=shipping, billing_information=billing)
@@ -81,8 +83,10 @@ def update_shipping_values(values):
         shippings = ShippingState.objects().order_by('state')
 
         for i, shipping in enumerate(shippings):
-            shipping.value = values[i]
-            shipping.save()
+            new_shipping = round(Decimal(values[i]), 2)
+            if shipping.value != new_shipping:
+                shipping.value = new_shipping
+                shipping.save()
 
         return True
     except:
