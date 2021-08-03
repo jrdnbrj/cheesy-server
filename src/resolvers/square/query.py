@@ -5,10 +5,10 @@ from ..type import CartInputType, SquarePaymentErrorType
 from ...middleware import authentication_required
 from ...services.square_service import (
     list_payments,
+    get_payment,
     create_payment, 
-    list_customers,
-    list_cards,
-    list_catalogs,
+    retrieve_subscription,
+    cancel_subscription,
     list_invoices,
     list_square_errors
 )
@@ -18,11 +18,11 @@ from decimal import Decimal
 
 class Query(ObjectType):
     list_payments = Field(JSONString)
+    get_payment = Field(JSONString, payment_id=String(required=True))
     create_payment = Field(String, payment_token=String(required=True), amount=String(required=True), contact_id=String(required=True),
         cart=List(CartInputType, required=True), shipping=String(required=True), discount=String(required=True))
-    list_customers = Field(JSONString)
-    list_cards = Field(String)
-    list_catalogs = Field(JSONString)
+    retrieve_subscription = Field(JSONString, subscription_id=String(required=True))
+    cancel_subscription = Field(String, subscription_id=String(required=True))
     list_invoices = Field(JSONString)
     list_square_errors = List(SquarePaymentErrorType)
 
@@ -30,22 +30,21 @@ class Query(ObjectType):
     def resolve_list_payments(parent, info):
         return list_payments()
 
+    @authentication_required()
+    def resolve_get_payment(parent, info, payment_id):
+        return get_payment(payment_id)
+
     def resolve_create_payment(parent, info, payment_token, amount, contact_id, cart, shipping, discount):
         amount = Decimal(amount)
         return create_payment(payment_token, round(amount, 2), contact_id, cart, shipping, discount)
 
     @authentication_required()
-    def resolve_list_customers(parent, info):
-        return list_customers()
+    def resolve_retrieve_subscription(parent, info, subscription_id):
+        return retrieve_subscription(subscription_id)
 
     @authentication_required()
-    def resolve_list_cards(parent, info):
-        list_cards()
-        return 'OK'
-
-    @authentication_required()
-    def resolve_list_catalogs(parent, info):
-        return list_catalogs()
+    def resolve_cancel_subscription(parent, info, subscription_id):
+        return cancel_subscription(subscription_id)
 
     @authentication_required()
     def resolve_list_invoices(parent, info):

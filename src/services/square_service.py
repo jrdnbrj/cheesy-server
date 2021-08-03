@@ -2,11 +2,20 @@ from ..db.documents import SquarePaymentError, Order
 
 from .checkout_service import get_checkout_contact
 
+from .utils import (
+    monthly_two_months, 
+    to_payment_object, 
+    to_subscription_object, 
+    checkout_subscription, 
+    validate_amount, 
+    to_cart_object
+)
+
 from square.client import Client
 from decouple import config
 
 from dateutil.relativedelta import relativedelta
-from datetime import datetime, date
+from datetime import date
 from decimal import Decimal
 import uuid
 import math
@@ -28,6 +37,17 @@ def list_payments():
     elif result.is_error():
         print(result.errors)
         raise Exception('Error in list_payments: {}'.format(result.errors[0]))
+
+
+def get_payment(payment_id):
+    print('asd')
+    result = client.payments.get_payment(payment_id=payment_id)
+
+    if result.is_success():
+        print(result.body['payment'])
+        return result.body['payment']
+    elif result.is_error():
+        print(result.errors)
 
 
 def create_payment(payment_token, amount, contact_id, cart, shipping_value, discount):
@@ -113,16 +133,6 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
 
 # CUSTOMERS
 
-def list_customers():
-    result = client.customers.list_customers()
-
-    if result.is_success():
-        return result.body
-    elif result.is_error():
-        print(result.errors)
-        raise Exception('Error in list_customers: {}'.format(result.errors[0]))
-
-
 def create_customer(billing, amount):
     result = client.customers.create_customer(
         body = {
@@ -155,20 +165,10 @@ def create_customer(billing, amount):
                 amount = amount / 100,
                 type = 'CREATE_CUSTOMER'
             ).save()
-        return 'An error has occurred. No payment has been made. Please try again.'
+        raise Exception('An error has occurred. No payment has been made.')
 
 
 # CARDS
-
-def list_cards():
-    result = client.cards.list_cards()
-
-    if result.is_success():
-        print(result.body)
-    elif result.is_error():
-        print(result.errors)
-        raise Exception('Error in list_cards: {}'.format(result.errors[0]))
-
 
 def create_card(payment_token, customer_id, amount):
     idempotency_key = str(uuid.uuid4())
@@ -196,29 +196,20 @@ def create_card(payment_token, customer_id, amount):
                 amount = amount / 100,
                 type = 'CREATE_CARD'
             ).save()
-        return 'An error has occurred. No payment has been made. Please try again.'
+        raise Exception('An error has occurred. No payment has been made.')
 
 
 # CATALOGS
 
-def get_catalog_info():
-    result = client.catalog.catalog_info()
+def retrieve_catalog(catalog_id):
+    result = client.catalog.retrieve_catalog_object(object_id=catalog_id)
 
     if result.is_success():
-        print(result.body)
+        print(result.body['object'])
+        return result.body['object']
     elif result.is_error():
         print(result.errors)
-        raise Exception('Error in get_catalog_info.: {}'.format(result.errors[0]))
-
-
-def list_catalogs():
-    result = client.catalog.list_catalog(types = "SUBSCRIPTION_PLAN")
-
-    if result.is_success():
-        return result.body
-    elif result.is_error():
-        print('Error:', result.errors)
-        raise Exception('Error in list_catalogs: {}'.format(result.errors[0]))
+        raise Exception('Error in retrieve_catalog: {}'.format(result.errors[0]))
 
 
 def upsert_catalog(cadence, amount, customer_id, card_id):
@@ -263,7 +254,7 @@ def upsert_catalog(cadence, amount, customer_id, card_id):
                 card_id = card_id,
                 type = 'CREATE_PLAN'
             ).save()
-        return 'An error has occurred. No payment has been made. Please try again.'
+        raise Exception('An error has occurred. No payment has been made.')
 
 
 # SUBSCRIPTIONS
@@ -301,7 +292,40 @@ def create_subscription(plan_id, customer_id, card_id, interval, amount):
                 card_id = card_id,
                 type = 'SUBSCRIPTION',
             ).save()
-        return 'An error has occurred. No payment has been made. Please try again.'
+        raise Exception('An error has occurred. No payment has been made.')
+
+
+def retrieve_subscription(subscription_id):
+    result = client.subscriptions.retrieve_subscription(subscription_id=subscription_id)
+
+    if result.is_success():
+        print(result.body['subscription'])
+        catalog = retrieve_catalog(result.body['subscription']['plan_id'])
+        result = result.body['subscription']
+        result['plan'] = catalog
+        return result
+    elif result.is_error():
+        print(result.errors)
+        raise Exception('Error in retrieve_subscription: {}'.format(result.errors[0]))
+
+
+def cancel_subscription(subscription_id):
+    result = client.subscriptions.cancel_subscription(subscription_id=subscription_id)
+
+    if result.is_success():
+        print('Subscription Status:', result.body['subscription']['status'])
+        return result.body['subscription']['status']
+    elif result.is_error():
+        for error in result.errors:
+            print('Error in cancel_subscription: ', error)
+            SquarePaymentError(
+                category = error.get('category'),
+                code = error.get('code'),
+                detail = error.get('detail'),
+                field = error.get('field'),
+                type = 'SUBSCRIPTION',
+            ).save()
+        raise Exception('An error has occurred. The subscription has not been canceled.')
 
 
 def init_subscription(cart, shipping_value, contact, customer_id, card_id):
@@ -374,100 +398,7 @@ def list_invoices():
         raise Exception('Error in list_invoices: {}'.format(result.errors[0]))
 
 
-# UTILS
-
-def validate_amount(cart, shipping, discount, amount):
-    subtotal = 0
-    
-    for item in cart:
-        price = round(Decimal(item['price']), 2)
-        quantity = round(Decimal(item['amount']), 2)
-        subtotal += price * quantity
-
-    shipping = round(Decimal(shipping), 2)
-    discount = round(Decimal(discount), 2)
-    total = subtotal + shipping - discount
-
-    if total != round(Decimal(amount), 2):
-        print('Amount does not match: {} != {}'.format(total, round(Decimal(amount), 2)))
-        return False
-
-    return True
-
-
-def checkout_subscription(cart):
-    checkout = []
-    subscription = []
-
-    for item in cart:
-        if item.join_club:
-            subscription.append(item)
-        else:
-            checkout.append(item)
-
-    return checkout, subscription
-
-
-def to_subscription_object(data, email, amount):
-    return {
-        "created_at": datetime.strptime(data.get('created_at', '2000-01-01T00:00:00.0Z'), '%Y-%m-%dT%H:%M:%SZ'),
-        "status": data.get('status'),
-        "buyer_email_address": email,
-        "subscription_id": data.get('id'),
-        "total_money": amount,
-        "start_date": datetime.strptime(data.get('start_date', '2000-01-01'), '%Y-%m-%d'),
-    }
-
-
-def to_payment_object(data):
-    datetime_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-    datetime_default = "2000-01-01T00:00:00.0Z"
-    
-    def to_datetime(key_from, key): 
-        date_time = key_from.get(key, datetime_default)
-        return datetime.strptime(date_time, datetime_format)
-
-    return {
-        "payment_id": data.get('id'),
-        "status": data.get('status'),
-        "total_money": Decimal(data.get('total_money', {}).get('amount', -100)),
-        "created_at": to_datetime(data, 'created_at'),
-        "buyer_email_address": data.get('buyer_email_address'),
-    }
-
-
-def to_cart_object(cart):
-    new_cart = []
-    for item in cart:
-        new_item = {
-            "amount": item.amount,
-            "price": item.price,
-            "name": item.name,
-            "total": item.total,
-            "bundle_up": item.bundle_up,
-            "buy_once": item.buy_once,
-            "join_club": item.join_club,
-            "interval": item.interval,
-            "choose1": item.choose1,
-            "choose3": item.choose3
-        }
-        new_cart.append(new_item)
-    
-    return new_cart
-
-
-def monthly_two_months(cart):
-    monthly = []
-    two_months = []
-
-    for item in cart:
-        if item.interval == 1:
-            monthly.append(item)
-        elif item.interval == 2:
-            two_months.append(item)
-        
-    return monthly, two_months
-
+# ERRORS
 
 def list_square_errors():
     return SquarePaymentError.objects()

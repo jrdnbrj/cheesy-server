@@ -6,6 +6,7 @@ from ..type import PayPalOrderType, CartInputType
 from ...services.paypal_service import (
     create_order, 
     capture_order, 
+    get_order,
     list_orders
 )
 
@@ -15,7 +16,8 @@ from decimal import Decimal
 class Query(ObjectType):
     create_order = Field(String, amount=String(required=True))
     capture_order = Field(JSONString, order_id=String(required=True), cart=List(CartInputType, required=True),
-        contact_id=String(required=True), shipping=String(required=True), discount=String(required=True),)
+        contact_id=String(required=True), shipping=String(required=True), discount=String(required=True))
+    get_order = Field(JSONString, order_id=String(required=True))
     list_orders = List(PayPalOrderType)
 
     def resolve_create_order(parent, info, amount):
@@ -30,6 +32,13 @@ class Query(ObjectType):
         print('Capture Order:', order)
         return order
     
+    @authentication_required()
+    def resolve_get_order(parent, info, order_id):
+        print('Obteniendo ando...')
+        order = get_order(order_id)
+        print('Get Order:', order)
+        return order
+
     @authentication_required()
     def resolve_list_orders(parent, info):
         return list_orders()
