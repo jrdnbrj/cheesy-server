@@ -293,4 +293,6 @@ class Order(Document):
     square = EmbeddedDocumentField(Square)
     paypal = EmbeddedDocumentField(PayPal)
     checkout_info = EmbeddedDocumentField(CheckoutContactEmbedded, required=True)
+    shipping = DecimalField(precision=2)
+    discount = DecimalField(precision=2)
     created_at = DateTimeField(default=datetime.utcnow)

@@ -196,4 +196,6 @@ class OrderType(ObjectType):
     square = Field(SquareType)
     paypal = Field(PayPalOrderType)
     checkout_info = Field(CheckoutContactTypeF)
+    shipping = Decimal()
+    discount = Decimal()
     created_at = DateTime()

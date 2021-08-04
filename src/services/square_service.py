@@ -101,11 +101,13 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
         order = Order(
             cart=to_cart_object(checkout + subscription), 
             square=to_payment_object(result.body['payment']), 
-            checkout_info=contact.to_json()
+            checkout_info=contact.to_json(),
+            shipping=shipping_value,
+            discount=discount
         ).save()
 
         if subscription != []:
-            response = init_subscription(subscription, shipping_value, contact, customer_id, card_id)
+            response = init_subscription(subscription, shipping_value, contact, customer_id, card_id, discount)
 
             if not response:
                 return 'An error has occurred with Square Server. The first payment has been completed successfully but the Cheesy Bittes Club subscriptions may not have been generated. Please Contact Us'
@@ -328,7 +330,7 @@ def cancel_subscription(subscription_id):
         raise Exception('An error has occurred. The subscription has not been canceled.')
 
 
-def init_subscription(cart, shipping_value, contact, customer_id, card_id):
+def init_subscription(cart, shipping_value, contact, customer_id, card_id, discount):
     monthly, two_months = monthly_two_months(cart)
     
     try:
@@ -349,7 +351,9 @@ def init_subscription(cart, shipping_value, contact, customer_id, card_id):
                 type="SUBSCRIPTION",
                 cart=to_cart_object(monthly), 
                 square=to_subscription_object(subscription, contact.billing_information.email, total), 
-                checkout_info=contact.to_json()
+                checkout_info=contact.to_json(),
+                shipping=shipping_value,
+                discount=discount,
             ).save()
 
         if two_months != []:
@@ -369,7 +373,9 @@ def init_subscription(cart, shipping_value, contact, customer_id, card_id):
                 type="SUBSCRIPTION",
                 cart=to_cart_object(two_months), 
                 square=to_subscription_object(subscription, contact.billing_information.email, total), 
-                checkout_info=contact.to_json()
+                checkout_info=contact.to_json(),
+                shipping=shipping_value,
+                discount=discount,
             ).save()
 
         return True

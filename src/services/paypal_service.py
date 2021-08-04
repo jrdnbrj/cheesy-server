@@ -115,7 +115,9 @@ def capture_order(order_id, cart, contact_id, shipping, discount):
         Order(
             cart=to_cart_object(cart), 
             paypal=to_paypal_object(order), 
-            checkout_info=contact.to_json()
+            checkout_info=contact.to_json(),
+            shipping=shipping,
+            discount=discount
         ).save()
     except Exception as e:
         print('New Order Error:', e)
