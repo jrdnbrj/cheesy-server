@@ -1,4 +1,4 @@
-from ..db.documents import Home, OurFamily, Terms
+from ..db.documents import Home, OurFamily
 
 from instascrape import Profile
 
