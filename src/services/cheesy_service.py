@@ -1,4 +1,4 @@
-from ..db.documents import Home, OurFamily
+from ..db.documents import Home, OurFamily, Terms
 
 from instascrape import Profile
 
@@ -34,6 +34,14 @@ def update_family(data):
     return get_family()
 
 
+def update_terms(data):
+    print(data)
+    
+    base64_to_pdf(data)
+
+    return True
+
+
 def get_instagram_media(count):
     cheesy = Profile('https://www.instagram.com/cheesybittes/')
 
@@ -58,3 +66,10 @@ def to_base64(img):
         return image.decode('utf-8')
     except:
         return ''
+
+
+def base64_to_pdf(data):
+    data = data.replace('data:application/pdf;base64,', '')
+    pdf = base64.b64decode(data)
+    with open('static/terms.pdf', 'wb') as file:
+        file.write(pdf)
