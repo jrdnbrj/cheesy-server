@@ -268,7 +268,7 @@ def create_subscription(plan_id, customer_id, card_id, interval, amount):
     result = client.subscriptions.create_subscription(
         body = {
             "idempotency_key": idempotency_key,
-            "location_id": "LWB5K8RGJYJSY",
+            "location_id": "LPAYA4VJRRXKH",
             "plan_id": plan_id,
             "customer_id": customer_id,
             "card_id": card_id,
