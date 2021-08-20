@@ -51,8 +51,8 @@ def get_payment(payment_id):
 
 def create_payment(payment_token, amount, contact_id, cart, shipping_value, discount):
 
-    if not validate_amount(cart, shipping_value, discount, amount):
-        raise Exception("Amount does not match with Cart's items")
+    # if not validate_amount(cart, shipping_value, discount, amount):
+    #     raise Exception("Amount does not match with Cart's items")
 
     checkout, subscription = checkout_subscription(cart)
 
