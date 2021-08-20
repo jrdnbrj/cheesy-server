@@ -394,7 +394,7 @@ def init_subscription(cart, shipping_value, contact, customer_id, card_id, disco
 # INVOICES
 
 def list_invoices():
-    result = client.invoices.list_invoices(location_id = "LWB5K8RGJYJSY")
+    result = client.invoices.list_invoices(location_id = "LPAYA4VJRRXKH")
 
     if result.is_success():
         return result.body
