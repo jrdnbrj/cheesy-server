@@ -21,13 +21,16 @@ from decouple import config
 class _PayPalClient:
 
     def __init__(self):
+        self.client_id_sandbox = config('PAYPAL_CLIENT_ID_SANDBOX')
+        self.client_secret_sandbox = config('PAYPAL_CLIENT_SECRET_SANDBOX')
+
         self.client_id = config('PAYPAL_CLIENT_ID')
         self.client_secret = config('PAYPAL_CLIENT_SECRET')
 
-        # print('PayPalClient:', type(config('PAYPAL_ENVIRONMENT')), config('PAYPAL_ENVIRONMENT'), config('PAYPAL_ENVIRONMENT') == 'sandbox', config('PAYPAL_ENVIRONMENT') == 'live')
+        print('PayPalClient:', config('PAYPAL_ENVIRONMENT'), self.client_id, self.client_secret)
 
         if config('PAYPAL_ENVIRONMENT') == 'sandbox':
-            self.environment = SandboxEnvironment(client_id=self.client_id, client_secret=self.client_secret)
+            self.environment = SandboxEnvironment(client_id=self.client_id_sandbox, client_secret=self.client_secret_sandbox)
         elif config('PAYPAL_ENVIRONMENT') == 'live':
             self.environment = LiveEnvironment(client_id=self.client_id, client_secret=self.client_secret)
 

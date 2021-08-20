@@ -22,7 +22,7 @@ import math
 
 
 client = Client(
-    access_token=config('SQUARE_ACCESS_TOKEN'), 
+    access_token=config('SQUARE_ACCESS_TOKEN') if config('SQUARE_ENVIRONMENT') == 'production' else config('SQUARE_ACCESS_TOKEN_SANDBOX'), 
     environment=config('SQUARE_ENVIRONMENT')
 )
 
@@ -40,7 +40,6 @@ def list_payments():
 
 
 def get_payment(payment_id):
-    print('asd')
     result = client.payments.get_payment(payment_id=payment_id)
 
     if result.is_success():
