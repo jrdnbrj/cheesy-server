@@ -54,7 +54,7 @@ def create_payment(payment_token, amount, contact_id, cart, shipping_value, disc
     if not validate_amount(cart, shipping_value, discount, amount):
         SquarePaymentError(
             detail = "Amount does not match with Cart's items.",
-            customer_id = 'Cheesy Contact ID: {}'.join(contact_id),
+            customer_id = 'Cheesy Contact ID: {}'.format(contact_id),
             amount = amount / 100,
             type = 'ONCE'
         ).save()

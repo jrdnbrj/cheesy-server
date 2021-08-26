@@ -119,7 +119,7 @@ def create_order(amount, discount, shipping, cart, contact_id):
 def capture_order(order_id, cart, contact_id, shipping, discount):
     order = _CaptureOrder().capture_order(order_id)
     order = order.result.__dict__['_dict']
-    print('Cart:', cart)
+    print('Order:', order)
 
     contact = get_checkout_contact(contact_id)
 
@@ -136,7 +136,7 @@ def capture_order(order_id, cart, contact_id, shipping, discount):
         PayPalPaymentError(
             order_id=order_id,
             contact_id=contact_id,
-            detail='In Caputre Order: {}'.join(e)
+            detail='In Caputre Order: {}'.format(e)
         ).save()
     return order
 
