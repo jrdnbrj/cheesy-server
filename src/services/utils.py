@@ -35,7 +35,7 @@ def to_paypal_object(order):
         "address": order['purchase_units'][0]['shipping']['address'],
         "capture_id": order['purchase_units'][0]['payments']['captures'][0]['id'],
         "capture_status": order['purchase_units'][0]['payments']['captures'][0]['status'],
-        "purchase_breakdown": order['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown'],
+        # "purchase_breakdown": order['purchase_units'][0]['payments']['captures'][0]['seller_receivable_breakdown'],
         "create_time": datetime.strptime(order['purchase_units'][0]['payments']['captures'][0]['create_time'], "%Y-%m-%dT%H:%M:%SZ"),
         "update_time": datetime.strptime(order['purchase_units'][0]['payments']['captures'][0]['update_time'], "%Y-%m-%dT%H:%M:%SZ"),
     }
