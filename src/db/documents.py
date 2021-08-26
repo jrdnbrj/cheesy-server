@@ -272,6 +272,14 @@ class SquarePaymentError(Document): # https://developer.squareup.com/reference/s
     created_at = DateTimeField(default=datetime.utcnow)
 
 
+class PayPalPaymentError(Document): 
+    order_id = StringField()
+    contact_id = StringField()
+    detail = StringField()
+    amount = DecimalField(precision=2)
+    created_at = DateTimeField(default=datetime.utcnow)
+
+
 class Subscription(Document):
     id = StringField(primary_key=True)
     card_id = StringField()

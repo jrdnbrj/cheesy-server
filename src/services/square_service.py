@@ -51,8 +51,14 @@ def get_payment(payment_id):
 
 def create_payment(payment_token, amount, contact_id, cart, shipping_value, discount):
 
-    # if not validate_amount(cart, shipping_value, discount, amount):
-    #     raise Exception("Amount does not match with Cart's items")
+    if not validate_amount(cart, shipping_value, discount, amount):
+        SquarePaymentError(
+            detail = "Amount does not match with Cart's items.",
+            customer_id = 'Cheesy Contact ID: {}'.join(contact_id),
+            amount = amount / 100,
+            type = 'ONCE'
+        ).save()
+        raise Exception("Amount does not match with Cart's items.")
 
     checkout, subscription = checkout_subscription(cart)
 
@@ -268,7 +274,7 @@ def create_subscription(plan_id, customer_id, card_id, interval, amount):
     result = client.subscriptions.create_subscription(
         body = {
             "idempotency_key": idempotency_key,
-            "location_id": "LPAYA4VJRRXKH",
+            "location_id": config('LOCATION_ID'),
             "plan_id": plan_id,
             "customer_id": customer_id,
             "card_id": card_id,
@@ -394,7 +400,7 @@ def init_subscription(cart, shipping_value, contact, customer_id, card_id, disco
 # INVOICES
 
 def list_invoices():
-    result = client.invoices.list_invoices(location_id = "LPAYA4VJRRXKH")
+    result = client.invoices.list_invoices(location_id = config('LOCATION_ID'))
 
     if result.is_success():
         return result.body

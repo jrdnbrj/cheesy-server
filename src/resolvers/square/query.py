@@ -35,8 +35,8 @@ class Query(ObjectType):
         return get_payment(payment_id)
 
     def resolve_create_payment(parent, info, payment_token, amount, contact_id, cart, shipping, discount):
-        amount = Decimal(2)
-        # amount = Decimal(amount)
+        # amount = Decimal(2)
+        amount = Decimal(amount)
         return create_payment(payment_token, round(amount, 2), contact_id, cart, shipping, discount)
 
     @authentication_required()

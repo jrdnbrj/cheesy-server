@@ -14,16 +14,17 @@ from decimal import Decimal
 
 
 class Query(ObjectType):
-    create_order = Field(String, amount=String(required=True))
+    create_order = Field(String, amount=String(required=True), discount=String(required=True), 
+        shipping=String(required=True), cart=List(CartInputType, required=True), contact_id=String(required=True))
     capture_order = Field(JSONString, order_id=String(required=True), cart=List(CartInputType, required=True),
         contact_id=String(required=True), shipping=String(required=True), discount=String(required=True))
     get_order = Field(JSONString, order_id=String(required=True))
     list_orders = List(PayPalOrderType)
 
-    def resolve_create_order(parent, info, amount):
+    def resolve_create_order(parent, info, amount, discount, shipping, cart, contact_id):
         print('Creando ando...')
-        order = create_order(round(Decimal(2), 2))
-        # order = create_order(round(Decimal(amount), 2))
+        order = create_order(round(Decimal(0.1), 2), discount, shipping, cart, contact_id)
+        # order = create_order(round(Decimal(amount), 2), discount, shipping, cart, contact_id)
         print('Create Order:', order['id'])
         return order['id']
     

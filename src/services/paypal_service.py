@@ -1,8 +1,8 @@
-from ..db.documents import PayPal, Order
+from ..db.documents import PayPal, Order, PayPalPaymentError
 
 from .checkout_service import get_checkout_contact
 
-from .utils import to_cart_object, to_paypal_object
+from .utils import to_cart_object, to_paypal_object, validate_amount
 
 from paypalcheckoutsdk.core import (
     PayPalHttpClient, 
@@ -60,8 +60,17 @@ class _GetOrder(_PayPalClient):
         return self.client.execute(request)
 
 
-def create_order(amount):
+def create_order(amount, discount, shipping, cart, contact_id):
     print('amount:', amount)
+
+    # if not validate_amount(cart, shipping, discount, amount):
+    #     PayPalPaymentError(
+    #         contact_id=contact_id,
+    #         amount=amount,
+    #         detail="Amount does not match with Cart's items."
+    #     ).save()
+    #     raise Exception("Amount does not match with Cart's items.")
+
     request_body = {
         "intent": "CAPTURE",
         "purchase_units": [
@@ -76,7 +85,7 @@ def create_order(amount):
                         },
                         # "discount": {
                         #     "currency_code": "USD",
-                        #     "value": "10.24"
+                        #     "value": discount
                         # },
                     }
                 },
@@ -124,7 +133,11 @@ def capture_order(order_id, cart, contact_id, shipping, discount):
         ).save()
     except Exception as e:
         print('New Order Error:', e)
-
+        PayPalPaymentError(
+            order_id=order_id,
+            contact_id=contact_id,
+            detail='In Caputre Order: {}'.join(e)
+        ).save()
     return order
 
 

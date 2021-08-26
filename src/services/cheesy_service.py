@@ -35,8 +35,6 @@ def update_family(data):
 
 
 def update_terms(data):
-    print(data)
-    
     base64_to_pdf(data)
 
     return True
