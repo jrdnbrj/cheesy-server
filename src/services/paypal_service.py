@@ -63,13 +63,13 @@ class _GetOrder(_PayPalClient):
 def create_order(amount, discount, shipping, cart, contact_id):
     print('amount:', amount)
 
-    # if not validate_amount(cart, shipping, discount, amount):
-    #     PayPalPaymentError(
-    #         contact_id=contact_id,
-    #         amount=amount,
-    #         detail="Amount does not match with Cart's items."
-    #     ).save()
-    #     raise Exception("Amount does not match with Cart's items.")
+    if not validate_amount(cart, shipping, discount, amount):
+        PayPalPaymentError(
+            contact_id=contact_id,
+            amount=amount,
+            detail="Amount does not match with Cart's items."
+        ).save()
+        raise Exception("Amount does not match with Cart's items.")
 
     request_body = {
         "intent": "CAPTURE",

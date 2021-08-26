@@ -23,8 +23,8 @@ class Query(ObjectType):
 
     def resolve_create_order(parent, info, amount, discount, shipping, cart, contact_id):
         print('Creando ando...')
-        order = create_order(round(Decimal(0.02), 2), discount, shipping, cart, contact_id)
-        # order = create_order(round(Decimal(amount), 2), discount, shipping, cart, contact_id)
+        # order = create_order(round(Decimal(0.02), 2), discount, shipping, cart, contact_id)
+        order = create_order(round(Decimal(amount), 2), discount, shipping, cart, contact_id)
         print('Create Order:', order['id'])
         return order['id']
     
