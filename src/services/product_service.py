@@ -69,11 +69,3 @@ def base64_to_file(img_encoded):
         file.write(img)
     
     return filename
-
-# def to_base64(img_name):
-#     try:
-#         image_url = config('URL') + "static/" + img_name
-#         image = base64.b64encode(requests.get(image_url).content)
-#         return image.decode('utf-8')
-#     except:
-#         return ''

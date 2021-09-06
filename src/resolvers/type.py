@@ -26,6 +26,7 @@ class ProductType(ObjectType):
     short_description = String()
     ingredients = List(String)
     price = Decimal()
+    percentage = Decimal()
     path = String()
     sequence = Int()
 

@@ -23,6 +23,7 @@ class Product(Document):
     short_description = StringField(max_length=500)
     ingredients = ListField(required=True, max_length=500)
     price = DecimalField(precision=2)
+    percentage = DecimalField(precision=2)
     path = StringField(max_length=15)
     sequence = IntField()
 

@@ -10,6 +10,7 @@ class EditProduct(Mutation):
         name = String(required=True)
         images = List(String, required=True)
         price = Decimal(required=True)
+        percentage = Decimal(required=True)
         description = String(required=True)
         short_description = String(required=True)
         ingredients = List(String, required=True)
@@ -19,12 +20,12 @@ class EditProduct(Mutation):
     result = Boolean()
 
     @authentication_required()
-    def mutate(root, info, name=None, images=None, price=None, description=None, short_description=None, ingredients=None, path=None, smoothies=None):
-        print('Actualizando Producto...')
+    def mutate(root, info, name=None, images=None, price=None, percentage=None, description=None, short_description=None, ingredients=None, path=None, smoothies=None):
         result = edit_product(
             name=name, 
             images=images, 
             price=price, 
+            percentage=percentage,
             description=description, 
             short_description=short_description, 
             ingredients=ingredients, 
